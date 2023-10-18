@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "587869193262",
+    "project_id": "fabclassified-29133",
+    "storage_bucket": "fabclassified-29133.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:587869193262:android:a38cfdff921cf21139cbbf",
+        "android_client_info": {
+          "package_name": "com.fabapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "587869193262-bvmh1u7imeisbta2tbgrs54vjo58ma3i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fabapp",
+            "certificate_hash": "8100f67eaff3c64968765ac8311f73a07e6d32de"
+          }
+        },
+        {
+          "client_id": "587869193262-cv4tquapv85u9gpoijoa3pg6cdv60uud.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCRut3zAiRN8oBr7SGWCoDCxSfLs57waU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "587869193262-cv4tquapv85u9gpoijoa3pg6cdv60uud.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "587869193262-vvp6qoo736f6h2hd10hkts5l1en4osaq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.fabapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
