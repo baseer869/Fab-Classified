@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, Button, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, SafeAreaView, } from 'react-native';
 import axios from 'axios';
-import ImagePicker from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { THEME, fontFamily } from '../theme/appTheme';
 import Video from 'react-native-video';
+import DocumentPicker from 'react-native-document-picker';
 
 export function AdFileUploadScreen({ route, navigation }) {
 
-  let {  add_id, user_id } = route?.params;
-
+  let { add_id, user_id } = route?.params;
   const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const [enabledButton, setEnabledButton] = useState(true);
 
   const removeImage = (index) => {
     const updatedImages = [...selectedImages];
@@ -24,64 +23,89 @@ export function AdFileUploadScreen({ route, navigation }) {
     setSelectedVideo(null)
   };
 
-  const handleMultipleImagePicker = () => {
-    ImagePicker.openPicker({
-      multiple: true,
-      width: 300,
-      height: 400,
-      cropping: true,
-      mediaType: 'photo',
-      maxFiles: '12',
-    })
-      .then(images => {
-        setSelectedImages(images)
-      })
-      .catch((error) => {
-        if (error.message !== 'User cancelled image selection') {
-          console.error('Error selecting video:', error);
-          // Handle other errors that may occur during the selection process
-        }
+  const handleImagePicker = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.images],
+        allowMultiSelection: true
       });
-  }
-  const handleAddMorePhotos = () => {
-    // Open the image picker for the user to select additional images
-    ImagePicker.openPicker({
-      multiple: true,
-      width: 300,
-      height: 400,
-      cropping: true,
-      mediaType: 'photo',
-      maxFiles: '12',
-    })
-      .then(newImages => {
-        // Append the new images to the existing selectedImages array
-        setSelectedImages([...selectedImages, ...newImages]);
-      })
-      .catch(error => {
-        if (error.message !== 'User cancelled image selection') {
-          console.error('Error selecting images:', error);
-          // Handle other errors that may occur during the selection process
-        }
-      });
+      if (result) {
+        // `result.uri` contains the URI of the selected image
+        console.log('Selected image:', result);
+        setSelectedImages([...selectedImages, ...result]);
+
+        // You can now use the selected image in your app
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User cancelled the picker
+      } else {
+        console.error('DocumentPicker Error:', error);
+        // Handle other errors that may occur during the selection process
+      }
+    }
   };
 
-console.log('seleced', selectedVideo);
-  //=============Video upload================//
-  const handleVideoPicker = () => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      mediaType: 'video',
-      maxFiles: '1',
-    })
-      .then(video => {
-        setSelectedVideo(video);
-      })
-      .catch((error) => {
-        if (error.message !== 'User cancelled image selection') {
-          console.error('Error selecting video:', error);
-        }
+  const handleAddMorePhotos = async () => {
+    // // Open the image picker for the user to select additional images
+    // ImagePicker.openPicker({
+    //   multiple: true,
+    //   width: 300,
+    //   height: 400,
+    //   cropping: true,
+    //   mediaType: 'photo',
+    //   maxFiles: '12',
+    // })
+    //   .then(newImages => {
+    //     // Append the new images to the existing selectedImages array
+    //     setSelectedImages([...selectedImages, ...newImages]);
+    //   })
+    //   .catch(error => {
+    //     if (error.message !== 'User cancelled image selection') {
+    //       console.error('Error selecting images:', error);
+    //       // Handle other errors that may occur during the selection process
+    //     }
+    //   });
+    //   ///========//
+
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.images],
+        allowMultiSelection: true
       });
+      if (result) {
+        // `result.uri` contains the URI of the selected image
+        console.log('Selected image:', result);
+        setSelectedImages([...selectedImages, ...result]);
+        // You can now use the selected image in your app
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User cancelled the picker
+      } else {
+        console.error('DocumentPicker Error:', error);
+        // Handle other errors that may occur during the selection process
+      }
+    }
+  };
+
+  const handleVideoPicker = async () => {
+    try {
+      const result = await DocumentPicker.pick({
+        type: [DocumentPicker.types.video],
+        allowMultiSelection: false
+      });
+      if (result) {
+        setSelectedVideo(result[0]);
+      }
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        // User cancelled the picker
+      } else {
+        console.error('DocumentPicker Error:', error);
+        // Handle other errors that may occur during the selection process
+      }
+    }
   };
   // on submit
   const onUploadFile = async () => {
@@ -89,17 +113,17 @@ console.log('seleced', selectedVideo);
     const formData = new FormData();
     for (const image of selectedImages) {
       formData.append('image[]', {
-        uri: image.path,
+        uri: image.uri,
         name: 'image.jpg',
-        type: image.mime,
+        type: image.type,
       });
     }
     formData.append('add_id', add_id);
     formData.append('user_id', user_id);
-   formData.append('video', {
-      uri: selectedVideo.path,
+    formData.append('video', {
+      uri: selectedVideo.uri,
       name: 'video.mp4',
-      type: selectedVideo.mime,
+      type: selectedVideo.type,
     })
     try {
       const imgResponse = await axios.post('https://fabkw.com/api/storeImg', formData, {
@@ -108,10 +132,8 @@ console.log('seleced', selectedVideo);
           'Content-Type': 'multipart/form-data',
         },
       });
-      //  let resofImage = response.json();
-      // console.log(imgResponse); // Check the response for success or failure
       setLoading(false)
-      navigation.replace('DrawerMenu', {  screen :'ProfileScreen' })
+      navigation.replace('DrawerMenu', { screen: 'ProfileScreen' })
     } catch (error) {
       console.error('image upload error:', error);
     }
@@ -119,7 +141,7 @@ console.log('seleced', selectedVideo);
   const AddImagesView = () => {
     return (
       <View>
-        <TouchableOpacity onPress={() => handleMultipleImagePicker()} style={styles.imageViewCongtainer} activeOpacity={0.8} >
+        <TouchableOpacity onPress={() => handleImagePicker()} style={styles.imageViewCongtainer} activeOpacity={0.8} >
           <Icon name={'camera-plus-outline'} size={24} color={THEME.black} />
           <Text style={styles.addText}>Upload Images</Text>
         </TouchableOpacity>
@@ -132,21 +154,21 @@ console.log('seleced', selectedVideo);
       <View>
         <TouchableOpacity onPress={() => handleVideoPicker()} style={[styles.imageViewCongtainer, { marginTop: 12 }]} activeOpacity={0.8} >
           <Icon name={'video-plus-outline'} size={30} color={THEME.black} />
-          <Text style={styles.addText}>Upload video of your Ad (optional)</Text>
+          <Text style={styles.addText}>Upload video of your Ad</Text>
         </TouchableOpacity>
       </View>
     )
   }
 
- function disabled(){
-  if(selectedImages?.length == 0 && selectedVideo == null){
-    return true;
-  } else if(loading){
-    return true
-  } else {
-    return false
-  }
- }
+  useEffect(() => {
+    if (selectedImages && selectedVideo) {
+      setEnabledButton(false);
+    } else {
+      setEnabledButton(true);
+    }
+
+  }, [selectedImages, selectedVideo])
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -163,7 +185,7 @@ console.log('seleced', selectedVideo);
             renderItem={({ item, index }) => (
               <View style={styles.imageDirection}>
                 <Image
-                  source={{ uri: item?.path }}
+                  source={{ uri: item?.uri }}
                   style={styles.imageSource}
                 />
                 <TouchableOpacity activeOpacity={0.8} style={styles.closeIcon} onPress={() => removeImage(index)}>
@@ -193,7 +215,7 @@ console.log('seleced', selectedVideo);
                 >
                   <Icon name="close" size={16} color="white" />
                 </TouchableOpacity>
-                <Video source={{ uri: selectedVideo?.path }}
+                <Video source={{ uri: selectedVideo?.uri }}
                   style={styles.videoSource}
                 />
               </View>
@@ -201,7 +223,7 @@ console.log('seleced', selectedVideo);
             <AddVideoView />}
         </View>
       </View>
-      <TouchableOpacity  onPress={() => onUploadFile()} style={[styles.btn, loading || disabled()  && { backgroundColor: THEME.lightGray }]} activeOpacity={0.8} >
+      <TouchableOpacity disabled={loading || enabledButton} onPress={() => onUploadFile()} style={[styles.btn, (loading || enabledButton) && { backgroundColor: THEME.lightGray }]} activeOpacity={0.8} >
         <Text style={styles.btnTitle}>{loading ? 'Please wait' : 'Submit'}</Text>
       </TouchableOpacity>
     </SafeAreaView>
@@ -257,7 +279,6 @@ const styles = StyleSheet.create({
   videoSource: {
     width: 120,
     height: 120,
-    resizeMode: 'cover',
     marginHorizontal: 4,
     borderRadius: 4
   },

@@ -10,10 +10,10 @@ const MenuHeader = ({ onMenuClick , onNotificationClick}) => {
             <TouchableOpacity onPress={()=> onMenuClick()} activeOpacity={0.8}  style={styles.menuItemStyle} >
                 <Icon name={'menu'} size={22} color={THEME.white} />
             </TouchableOpacity>
-            <Image  source={require('../assets/fab.png')}  style={{  width:100, height:30, }}/>
-            <TouchableOpacity  onPress={()=> onNotificationClick()} activeOpacity={0.8} style={styles.menuItemStyle} >
+            <Image  source={require('../assets/fab.png')}  style={{  width:100, height:30, left:120 }}/>
+            {/* <TouchableOpacity  onPress={()=> onNotificationClick()} activeOpacity={0.8} style={styles.menuItemStyle} >
                 <Icon name={'bell'} size={22} color={THEME.white} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </SafeAreaView>
     )
 }
@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     headerContainer:{
         flexDirection:"row",
         alignItems:'center',
-        justifyContent:'space-between',
+        // justifyContent:'space-between',
         backgroundColor:"rgba(255, 0, 0, 0.41)",
     },
     menuItemStyle :{

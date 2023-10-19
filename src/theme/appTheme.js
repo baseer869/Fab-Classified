@@ -7,7 +7,10 @@ const THEME = {
     black: "#000",
     white: "#fff",
     backgroundColor: "#F8F9FD",
-    grayRGBA: 'rgb(242,242,242)'
+    grayRGBA: 'rgb(242,242,242)',
+    info: '#4D4D4D',
+    success:'#138255',
+    error:'#C52E2D'
     
 };
 

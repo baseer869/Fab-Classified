@@ -7,7 +7,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { getDeviceId, onCompleteProfile } from '../services';
 import { API_BASE_URL } from '../services/apiConfig';
 
-const AddProfileScreen = ({ navigation }) => {
+const AddProfileScreen = ({ navigation, route }) => {
+  let { userid} = route?.params;
   const [phoneNumber, setPhoneNumber] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -27,8 +28,7 @@ const AddProfileScreen = ({ navigation }) => {
   }, [ username, password, confirmPassword,]);
 
   const onSubmit = async () => {
-    let userId = 33;
-    let response = await onCompleteProfile(`api/complete-profile?name=${username}&pwd=${password}&confirmpwd=${confirmPassword}&uid=${userId}`, null);
+    let response = await onCompleteProfile(`api/complete-profile?name=${username}&pwd=${password}&confirmpwd=${confirmPassword}&uid=${userid}`, null);
     console.log('response of complete', response);
     let res = await response.json();
     console.log('resss', res);

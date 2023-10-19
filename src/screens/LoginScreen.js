@@ -7,6 +7,7 @@ import { LoggedWithGoogle, Login, SignUp, saveUserInfo, saveUserToken } from '..
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { getDeviceId } from '../services';
+import Toast from 'react-native-toast-message';
 
 
 const SignInScreen = ({ navigation }) => {
@@ -80,24 +81,34 @@ const SignInScreen = ({ navigation }) => {
 
   const handleSignIn = async () => {
     setLoading(true);
-
-    let response = await Login(`api/login?user_mob=${phoneNumber}&user_pwd=${password}&phonecode=${8898}`, null);
-    console.log('regggggg', response);
-    let res = await response.json();
-    console.log('respomssssssssssss', res);
-    // if (response && (response?.status == 200 && res === 'mnf')) {
-    //   setLoading(false)
-    //   ToastAndroid.show('User does not exist', ToastAndroid.LONG);
-    // } else if (response && (response?.status == 200 && res === 'rnc')) {
-    //   setLoading(false)
-    //   ToastAndroid.show('Please complete your profile to continue', ToastAndroid.LONG);
-    //    navigation.replace('AddProfileScreen');
-    // } 
-    // else if (response && response.status == 200) {
-    //   console.log('ssssss', res);
-    //   setLoading(false)
-    //   // navigation.navigate('OtpLogin', { otpCode: res?.otp });
-    // }
+   let deviceId = await getDeviceId()
+    let response = await Login(`api/login?user_mob=${phoneNumber}&user_pwd=${password}&phonecode=${888}`, null);
+    let res = await response?.json();
+    if (response && (response?.status == 200 && res === 'mnf')) {
+      setLoading(false)
+      let error = THEME.error;
+      Toast.show({
+          type: 'tomatoToast',
+          position: 'bottom',
+          props: { msg: 'User does not exist.', color: error },
+      });
+      return
+    } else if (response && (response?.status == 200 && res === 'rnc')) {
+      setLoading(false)
+      let error = THEME.error;
+      Toast.show({
+          type: 'tomatoToast',
+          position: 'bottom',
+          props: { msg: 'Please complete your profile to continue.', color: error },
+      });
+       navigation.replace('AddProfileScreen');
+    } 
+    else if (response && response.status == 200) {
+      console.log('ssssss', res);
+      setLoading(false)
+      navigation.navigate('DrawerMenu');
+      return
+    }
   };
 
   const handleForgotPassword = () => {

@@ -3,14 +3,19 @@ import { View, Text, StyleSheet, StatusBar, Platform, Image, ScrollView } from '
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { THEME } from '../theme/appTheme';
 import { getDeviceId, verifyOTP } from '../services/apiUtils';
+import { SignUp } from '../services';
+import axios from 'axios';
+import { encode } from 'base-64';
+import Toast from 'react-native-toast-message';
 
 const OtpVerificationScreen = ({ navigation, route }) => {
-    let { otpCode, phoneNumber } = route?.params
-    const [otp, setOtp] = useState(['', '', '', '']);
+    let { phoneNumber } = route?.params
+    const [otp, setOtp] = useState(['', '', '', '',]);
     const inputRefs = [useRef(), useRef(), useRef(), useRef()];
     const [isOtpComplete, setIsOtpComplete] = useState(false);
     const [focusedInput, setFocusedInput] = useState(-1);
-
+    const [loading, setLoading] = useState(false);
+    const [buttonStatusMsg, setButtonStatusMsg] = useState('Verifying OTP')
     const handleOtpChange = (index, value) => {
         if (value.length === 1 && index < 3) {
             inputRefs[index + 1].current.focus();
@@ -28,21 +33,73 @@ const OtpVerificationScreen = ({ navigation, route }) => {
     }, [otp]);
 
     const onVerifyOTP = async () => {
-        let deviceId = await getDeviceId();
-        var a = String(otp);
-        a = a.replace(/\,/g, ''); // This removes all commas
-        const phoneId = deviceId.substring(0, 4);
-        console.log('phoneId', phoneId);
-        let response = await verifyOTP(`api/verify?vcode=${parseInt(a)}&user_mob=${phoneNumber}&phonecode=${phoneId}`);
-        let otpResponse = await response?.json();
-        console.log('otp response', otpResponse);
-        if (response && response?.status == 200 && otpResponse == 'success') {
-            console.log('success otp');
-            navigation.replace('AddProfileScreen');
-        } else if (response && response?.status == 200 && response == 'wvc') {
-            console.log('show  toast  for wrong code');
-        }
-    };
+        // TWILIO OTP
+        setLoading(true);
+        const accountSid = 'AC2614c158a71c453e081884d57aa818ec';
+        const authToken = '9572e984473c190550a96a71de627e98';
+        const serviceSid = 'VA11b7f786f210e0efdfc150f49bfaddac'; // Service SID for your Verify service
+        // Encode the credentials with base-64
+        const base64Credentials = encode(`${accountSid}:${authToken}`);
+        const axiosConfig = {
+            headers: {
+                'Authorization': `Basic ${base64Credentials}`,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+        };
+        var code = String(otp);
+        code = code.replace(/\,/g, ''); // This removes all commas
+        axios
+            .post(`https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`, {
+                "To": `+${phoneNumber}`,
+                "Code": `${code}`,
+                "Channel": "sms",
+            }, axiosConfig)
+            .then(async response => {
+                console.log('Verification request successful', response?.status);
+                if (response && response?.status == 200 && response?.data?.valid == false) {
+                    setLoading(false);
+                    let error = THEME.error;
+                    Toast.show({
+                        type: 'tomatoToast',
+                        position: 'bottom',
+                        props: { msg: 'Invalid OTP', color: error },
+                    });
+                } if (response && response?.status == 200 && response?.data?.status == "approved") {
+                    setButtonStatusMsg('Creating profile...')
+                    let deviceId = await getDeviceId();
+                    const phoneId = deviceId;
+                    let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
+                    let res = await response.json();
+                    if (response?.status == 200) {
+                        console.log('user registered success');
+                        setLoading(false);
+                        navigation.replace('AddProfileScreen', {userid: response?.userid });
+                    } else {
+                        console.log('user registered failed');
+                        setLoading(false);
+                        console.log('response of sign==>', response);
+                    }
+                }
+                return response;
+            })
+            .catch(error => {
+                if (error.response) {
+                    setLoading(false);
+                    if (error.response?.status == 404) {
+                        setLoading(false);
+                        let info = THEME.info;
+                        Toast.show({
+                            type: 'tomatoToast',
+                            position: 'bottom',
+                            props: { msg: 'something went wrong try again.', color: info },
+                        });
+                    }
+                } else {
+                    setLoading(false);
+                    console.error('Error making the request:', error.message);
+                }
+            });
+    }
 
     const handleInputBlur = (index) => {
         setFocusedInput(-1);
@@ -62,8 +119,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 <View style={{ paddingTop: 20 }}>
                     <Text style={styles.title}>Verify your phone number</Text>
                     <View style={{ paddingTop: 80 }}>
-                        <Text style={[styles.title, { textAlign: 'left', top: 20, fontSize: 20 }]}>{`Verification Code: ${otpCode}`}</Text>
-                        <Text style={[styles.subTitle, { textAlign: 'left', top: 20, }]}>Enter 4-digit code to continue</Text>
+                        <Text style={[styles.subTitle, { textAlign: 'left', top: 20, }]}>Enter 6-digit code to continue</Text>
                         <View style={styles.otpContainer}>
                             {otp.map((digit, index) => (
                                 <TextInput
@@ -95,10 +151,10 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                     <Button
                         mode="contained"
                         onPress={onVerifyOTP}
-                        style={[styles.resendButton, { backgroundColor: isOtpComplete ? THEME.primary : THEME.lightGray }]}
-                        disabled={!isOtpComplete} // Disable the button if OTP is not complete
+                        style={[styles.resendButton, { backgroundColor: isOtpComplete ? THEME.primary : loading ? THEME.lightGray : THEME.lightGray }]}
+                        disabled={!isOtpComplete || loading}
                     >
-                        Verify
+                        {loading ? buttonStatusMsg : "Verify"}
                     </Button>
                 </View>
             </ScrollView>

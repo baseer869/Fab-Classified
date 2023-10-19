@@ -3,9 +3,11 @@ import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image } 
 import { TextInput, Button, Checkbox, HelperText, Provider } from 'react-native-paper';
 import CountryPicker from 'react-native-country-picker-modal';
 import { THEME, fontFamily } from '../theme/appTheme';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SignUp, getDeviceId } from '../services';
-import { API_BASE_URL } from '../services/apiConfig';
+import axios from 'axios';
+import { encode } from 'base-64';
+// import querystring from 'querystring';
+import Toast from 'react-native-toast-message';
 
 const SignUpScreen = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,6 +20,7 @@ const SignUpScreen = ({ navigation }) => {
     const [isSignUpDisabled, setIsSignUpDisabled] = useState(true);
     const [securePassword, setSecurePassword] = useState(true); // State to control password visibility
     const [confirmSecurePassword, setConfirmSecurePassword] = useState(true); // State to control password visibility
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         // Enable the Sign Up button when all form fields are filled
@@ -28,34 +31,74 @@ const SignUpScreen = ({ navigation }) => {
         }
     }, [phoneNumber, username, password, confirmPassword, isChecked]);
 
+
+    const getTwilioOTPCode = async (phoneNumber) => {
+
+
+    };
+
     const handleSignUp = async () => {
-        let deviceId = await  getDeviceId();
-        const phoneId = deviceId.substring(0, 4);
-        console.log('phoneId', phoneId);
-        let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
-        let res = await response.json();
-        if (response && response.status == 200) {
-            navigation.navigate('OtpLogin', { otpCode: res?.otp, phoneNumber });
-        }
+        setLoading(true);
+        // let deviceId = await getDeviceId();
+        // const phoneId = deviceId;
+        // let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
+        // let res = await response.json();
+        // if (response && response.status == 200) {
 
-        // You can access the form data: phoneNumber, username, password, isChecked, and selectedCountry
-        // Example password validation
-        // if (password !== confirmPassword) {
-        //     setPasswordError(true);
-        //     return;
-        // }
-        // Reset password error state
-        // setPasswordError(false);
-        // Proceed with sign-up
-    };
-    // Function to toggle password visibility
-    const togglePasswordVisibility = () => {
-        setSecurePassword(!securePassword);
-    };
+        // TWILIO OTP
+        const accountSid = 'AC2614c158a71c453e081884d57aa818ec';
+        const authToken = '9572e984473c190550a96a71de627e98';
+        const serviceSid = 'VA11b7f786f210e0efdfc150f49bfaddac';  // Service SID for your Verify service
+        // Encode the credentials with base-64
+        const base64Credentials = encode(`${accountSid}:${authToken}`);
+        const axiosConfig = {
+            headers: {
+                'Authorization': `Basic ${base64Credentials}`,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+        };
+        console.log('phoneNumber', `+${selectedCountry?.callingCode[0]}${phoneNumber}`);
+        axios
+            .post(`https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`, {
+                "To": `+${selectedCountry?.callingCode[0]}${phoneNumber}`,
+                "Channel": "sms",
+            }, axiosConfig)
+            .then(response => {
+                console.log('Verification request successful');
+                console.log('Response data:', response.data);
+                setLoading(false);
+                let error = THEME.success;
+                Toast.show({
+                    type: 'tomatoToast',
+                    position: 'bottom', // 'top', 'center', 'bottom'
+                    // And I can pass any custom props I want
+                    props: { msg: 'Verification code sent to your mobile.', color:  error  },
+                });
+                setTimeout(() => {
+                    navigation.navigate('OtpLogin', { phoneNumber: `+${selectedCountry?.callingCode[0]}${phoneNumber}` });
+                }, 600);
+                // Handle the response or verification code as needed
+                return response;
+            })
+            .catch(error => {
+                if (error.response) {
+                    setLoading(false);
+                    if (error.response?.status == 400) {
+                        setLoading(false);
+                        let error = THEME.error;
+                        Toast.show({
+                            type: 'tomatoToast',
+                            position: 'bottom', // 'top', 'center', 'bottom'
+                            // And I can pass any custom props I want
+                            props: { msg: 'Invalid mobile number.', color:  error  },
+                        });
+                    }
+                } else {
+                    setLoading(false);
+                    console.error('Error making the request:', error.message);
+                }
+            });
 
-    // Function to toggle password visibility
-    const toggleConfirmPasswordVisibility = () => {
-        setConfirmSecurePassword(!confirmSecurePassword);
     };
     return (
         <Provider>
@@ -64,7 +107,7 @@ const SignUpScreen = ({ navigation }) => {
                 <Image source={require('../assets/signup.png')} style={{
                     width: 300, height: 200, resizeMode: 'contain', alignSelf: 'center',  // Rotate the image by 90 degrees
                 }} />
-                <View style={{ top: 25}}>
+                <View style={{ top: 25 }}>
                     <Text style={styles.title}>Create a New Account</Text>
                     <Text style={styles.subtitle}>Let's start to sell</Text>
                 </View>
@@ -80,6 +123,7 @@ const SignUpScreen = ({ navigation }) => {
                             onSelect: (country) => setSelectedCountry(country),
                         }}
                         containerButtonStyle={styles.countryPicker}
+
                     />
                     <View style={styles.inputContainer}>
                         <TextInput
@@ -97,76 +141,10 @@ const SignUpScreen = ({ navigation }) => {
                                     placeholder: THEME.lightGray,
                                 },
                             }}
-                        // left={<TextInput.Icon icon="phone" size={24} color={THEME.primary} style={styles.inputIcon} />}
+                            disabled={loading}
                         />
                     </View>
                 </View>
-
-                {/* <View style={styles.inputContainer}>
-                    <TextInput
-                        mode='flat'
-                        label="Full Name"
-                        value={username}
-                        onChangeText={setUsername}
-                        style={styles.input}
-                        theme={{
-                            colors: {
-                                primary: THEME.primary,
-                                accent: THEME.primary,
-                                text: THEME.black,
-                                placeholder: THEME.lightGray,
-                            },
-                        }}
-                        left={<TextInput.Icon icon="account" size={24} color={THEME.primary} style={styles.inputIcon} />}
-                    />
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        mode='flat'
-                        label="Password"
-                        value={password}
-                         secureTextEntry={securePassword} // Toggle visibility based on the state
-                        onChangeText={setPassword}
-                        style={styles.input}
-                        theme={{
-                            colors: {
-                                primary: THEME.primary,
-                                accent: THEME.primary,
-                                text: THEME.black,
-                                placeholder: THEME.lightGray,
-                            },
-                        }}
-                        left={<TextInput.Icon icon="lock" size={24} color={THEME.primary} style={styles.inputIcon} />}
-                        right={<TextInput.Icon color={THEME.lightGray} icon={securePassword ? 'eye-off' : 'eye'}  onPress={togglePasswordVisibility}/>}
-                    />
-                </View>
-
-                <View style={styles.inputContainer}>
-                    <TextInput
-                        mode='flat'
-                        label="Confirm Password"
-                        secureTextEntry={confirmSecurePassword} // Toggle visibility based on the state
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        style={styles.input}
-                        theme={{
-                            colors: {
-                                primary: THEME.primary,
-                                accent: THEME.primary,
-                                text: THEME.black,
-                                placeholder: THEME.lightGray,
-                            },
-                        }}
-                        left={<TextInput.Icon icon="lock" size={24} color={THEME.primary} style={styles.inputIcon} />}
-                        right={<TextInput.Icon color={THEME.lightGray} icon={confirmSecurePassword ? 'eye-off' : 'eye'}  onPress={toggleConfirmPasswordVisibility}/>}
-                    />
-                </View>
-
-                <HelperText type="error" visible={passwordError}>
-                    Passwords do not match.
-                </HelperText> */}
-
                 <View style={styles.checkboxContainer}>
                     <Checkbox.Android
                         status={isChecked ? 'checked' : 'unchecked'}
@@ -175,19 +153,19 @@ const SignUpScreen = ({ navigation }) => {
                     />
                     <Text style={styles.checkboxLabel}>
                         I have read the FabApp{' '}
-                        <Text onPress={()=> navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Terms Conditions</Text>{' '}
+                        <Text onPress={() => navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Terms Conditions</Text>{' '}
                         and{' '}
-                        <Text onPress={()=> navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>
+                        <Text onPress={() => navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>
                     </Text>
                 </View>
                 <Button
                     mode='outlined'
                     onPress={handleSignUp}
-                    style={[styles.signUpButton, { backgroundColor: isSignUpDisabled ? THEME.lightGray : THEME.primary }]}
-                    disabled={isSignUpDisabled}
+                    style={[styles.signUpButton, { backgroundColor: isSignUpDisabled || loading ? THEME.lightGray : THEME.primary }]}
+                    disabled={isSignUpDisabled || loading}
                     textColor='#fff'
                 >
-                    Sign Up
+                    {loading ? "Please wait" : " Sign Up"}
                 </Button>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 20 }}>
                     <Text style={styles.infoText}>Already have an account?</Text>
@@ -268,7 +246,7 @@ const styles = StyleSheet.create({
         marginTop: 20,
         color: THEME.white,
         borderRadius: 8,
-        marginHorizontal:12,
+        marginHorizontal: 12,
     },
 });
 

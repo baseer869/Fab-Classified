@@ -5,18 +5,14 @@ import { THEME, fontFamily } from '../../theme/appTheme'
 import { ImageBasePath } from '../../services/apiConstant';
 import { subCategories } from '../../services';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { BackHeaderWithLogo } from '../../components/BackHeader';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: THEME.white
   },
-  appLogo: {
-    width: 130,
-    height: 130,
-    alignSelf: 'center',
-    bottom: 40
-  },
+ 
   title: {
     fontFamily: fontFamily.poppins_500,
     fontSize: 16,
@@ -26,7 +22,7 @@ const styles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     paddingHorizontal: 16,
-    bottom: 60
+    paddingTop: 15
   },
   categoryContantainer: {
     backgroundColor: 'white',
@@ -77,21 +73,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 13,
     borderRadius: 8,
     marginTop: 10
+  },
+  headerCoontainer: {
+    flexDirection: 'row',
+    height: 70,
+    paddingHorizontal: 16
   }
 });
 
 
 export function SelectCategoryItem({ title, category, selectCategory }) {
-  // const [selectCategory, setSelectedCategory] = useState(selectCategory);
   const [mainCategory, setMaincategories] = useState(category?.title)
-
-  // useEffect(() => {
-  //   if (title) {
-  //     console.log('item pushed');
-  //     setSelectedCategory((prevSelectCategory) => [...prevSelectCategory, title]);
-  //   }
-  // }, [title]);
-  // console.log('title', selectCategory) ;
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-start', }}>
       <View style={styles.categoryContantainer}>
@@ -116,7 +108,7 @@ const CategoriesSelectionScreen = ({ navigation, route }) => {
     let subCategory = item;
     let response = await subCategories(`api/subcategory?cid=${item?.cid}`);
     let res = await response.json();
-      navigation.navigate('AdsFormScreen', { mainCategory, subCategory })
+    navigation.navigate('AdsFormScreen', { mainCategory, subCategory })
     // if (res == "empty") {
     //   navigation.navigate('AdsFormScreen');
     // } else {
@@ -126,7 +118,7 @@ const CategoriesSelectionScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Image source={require('../../assets/fab-logo.jpg')} style={styles.appLogo} />
+      <BackHeaderWithLogo goBack={() => navigation.goBack()} />
       <View style={styles.innerContainer}>
         <Text style={styles.title}>Your Car Details</Text>
         <SelectCategoryItem category={mainCategory} />

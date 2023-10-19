@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button, SafeAreaView, TextInput } from 'react-native';
 import auth from '@react-native-firebase/auth';
 
-function OTP() {
+function OTP({navigation}) {
     // If null, no SMS has been sent
     const [confirm, setConfirm] = useState(null);
 
     // verification code (OTP - One-Time-Passcode)
     const [code, setCode] = useState('');
-
+    const [phoneNumber, setPhoneNumber] = useState(null)
     // Handle login
     function onAuthStateChanged(user) {
         if (user) {
@@ -25,10 +25,12 @@ function OTP() {
     }, []);
 
     // Handle the button press
-    async function signInWithPhoneNumber(phoneNumber) {
-        const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+    async function signInWithPhoneNumber() {
+        console.log('phons', phoneNumber);
+        const confirmation = await auth().signInWithPhoneNumber(`+92${phoneNumber}`);
        console.log('confirmation', confirmation);
         setConfirm(confirmation);
+        navigation.navigate('SplashScreen')
     }
 
     async function confirmCode() {
@@ -43,9 +45,14 @@ function OTP() {
     if (!confirm) {
         return (
             <SafeAreaView style={{ flex: 1, paddingTop: 30 }}>
+                <TextInput
+                 value={phoneNumber}
+                 onChangeText={(text)=> setPhoneNumber(text)}
+                 placeholder='Enter phone number'
+                />
                 <Button
                     title="Phone Number Sign In"
-                    onPress={() => signInWithPhoneNumber('+44 7444 555666')}
+                    onPress={() => signInWithPhoneNumber(`${phoneNumber}`)}
                 />
             </SafeAreaView>
 

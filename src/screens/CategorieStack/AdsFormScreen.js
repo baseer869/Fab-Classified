@@ -1,10 +1,12 @@
-import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Dimensions, TextInput, Platform } from 'react-native'
-import React, { useState } from 'react'
+import { SafeAreaView, StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, Dimensions, TextInput, Platform, Alert } from 'react-native'
+import React, { Profiler, useState } from 'react'
 import { THEME, fontFamily } from '../../theme/appTheme'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { CarModel } from '../../services/constantData';
 import { PosAds, listCarMakes, readUserInfo } from '../../services';
+import { BackHeaderWithLogo } from '../../components/BackHeader';
+import { useEffect } from 'react';
 
 const styles = StyleSheet.create({
   container: {
@@ -189,6 +191,9 @@ const AdsFornScreen = ({ navigation, route }) => {
   const CarMakebottomSheetRef = React.useRef();
   const CarModelbottomSheetRef = React.useRef();
 
+  const [profile, setProfile] = useState(null);
+  const [disabled, setDisabled] = useState(true);
+
   const handleConditionSelect = (conditionId) => {
     setSelectedCondition(conditionId);
   };
@@ -248,7 +253,65 @@ const AdsFornScreen = ({ navigation, route }) => {
     fetchCarMake();
   }, [])
   ///
+  useEffect(() => {
+    readUserInfo()
+      .then((userInfo) => {
+        console.log('useronf', userInfo?.data);
+        if (userInfo) {
+          setProfile(userInfo?.data);
+        } else {
+          console.log('User Information not found.');
+        }
+      });
+  }, [])
+
+  // useEffect(()=>{
+  //   if(mainCategory && mainCategory?.cid !== 1){
+  //     if(!title && !description && !selectedCondition && !price){
+  //         return setDisabled(false);
+  //     }
+  //   }
+  // },[title, description, selectedCondition, price])
+
   const handleSubmit = async () => {
+    if (mainCategory && mainCategory?.cid == 1) {
+      if (!carMake) {
+        return Alert.alert('Please enter car make')
+      } else if (!carModel) {
+        return Alert.alert('Please enter car model')
+      } else if (!carYear) {
+        return Alert.alert('Please enter year')
+      } else if (!kmDriven) {
+        return Alert.alert('Please enter Km Driven')
+      }
+      else if (!title) {
+        return Alert.alert('Please enter Ad title')
+      }
+      else if (!price) {
+        return Alert.alert('Please enter price')
+      }
+      else if(!description){
+        return  Alert.alert('Please enter Ad description')
+       }
+      else if(!selectedCondition){
+        return  Alert.alert('Please select condition')
+       }
+       
+    } else if(mainCategory && mainCategory?.cid !== 1){
+      if (!title) {
+        return Alert.alert('Please enter Ad title')
+      }
+      else if (!price) {
+        return Alert.alert('Please enter price')
+      }
+      else if(!description){
+        return  Alert.alert('Please enter Ad description')
+       }
+      else if(!selectedCondition){
+        return  Alert.alert('Please select condition')
+       }
+    }
+
     let user_id = null
     setLoading(true)
     readUserInfo()
@@ -256,6 +319,7 @@ const AdsFornScreen = ({ navigation, route }) => {
         if (userInfo) {
           // console.log('User Information:', userInfo);
           user_id = userInfo?.data?.user_id
+          setProfile(userInfo);
           console.log('user_id', user_id);
         } else {
           console.log('User Information not found.');
@@ -264,24 +328,37 @@ const AdsFornScreen = ({ navigation, route }) => {
 
 
     setTimeout(async () => {
-      const AdsPayload = {
-        user_id: user_id,
-        main_cat_id: mainCategory?.cid,
-        cat_id: subCategory?.cid,
-        make_id: carMake,
-        model_id: carModel,
-        year: carYear,
-        fuel_type: null,
-        km_driven: kmDriven,
-        price: price,
-        car_condition: selectedCondition,
-        title: title,
-        add_details: description,
-        location: null,
-        latitude: null,
-        longitude: null,
-        color: null,
-      };
+      let AdsPayload;
+      if (mainCategory?.cid == 1) {
+        AdsPayload = {
+          user_id: user_id,
+          main_cat_id: mainCategory?.cid,
+          cat_id: subCategory?.cid,
+          make_id: carMake,
+          model_id: carModel,
+          year: carYear,
+          km_driven: kmDriven,
+          price: price,
+          car_condition: selectedCondition,
+          title: title,
+          add_details: description,
+          location: null,
+          latitude: null,
+          longitude: null,
+          color: null,
+          fuel_type: null,
+        };
+      } else {
+        AdsPayload = {
+          user_id: user_id,
+          main_cat_id: mainCategory?.cid,
+          cat_id: subCategory?.cid,
+          price: price,
+          title: title,
+          add_details: description,
+          car_condition: selectedCondition,
+        }
+      }
       console.log('payload===>', AdsPayload);
       let response = await PosAds('api/saveadd', AdsPayload);
       let AdResponse = await response?.json();
@@ -295,25 +372,26 @@ const AdsFornScreen = ({ navigation, route }) => {
       }
     }, 300);
 
-
   };
+
   return (
     <SafeAreaView style={styles.container}>
+      <BackHeaderWithLogo goBack={() => navigation.goBack()} />
       <ScrollView style={{ flex: 1 }}>
-        <Image source={require('../../assets/fab-logo.jpg')} style={styles.appLogo} />
-        <View style={{ flex: 1, bottom: 40 }}>
+        <View style={{ flex: 1, paddingTop: 10 }}>
           <Text style={[styles.title, { fontFamily: fontFamily.poppins_500, paddingHorizontal: 17 }]}>Enter your Ad details to continue</Text>
-          <View style={[styles.dropDownContainer, { paddingTop: 30 }]}>
-            <View style={styles.iconView}>
-              <Icon name={'car-outline'} size={20} color={THEME.black} />
-            </View>
-            <TouchableOpacity onPress={() => CarMakebottomSheetRef.current.open()} activeOpacity={0.8} style={styles.dropDown}>
-              <InputTitle title={'Car Model'} carMakeName={carMakeName} carModelName={carModelName} />
-              <Icon name='chevron-down' size={20} color={THEME.black} />
-            </TouchableOpacity>
-          </View>
+          {mainCategory?.cid == 1 &&
+            <View style={[styles.dropDownContainer, { paddingTop: 30 }]}>
+              <View style={styles.iconView}>
+                <Icon name={'car-outline'} size={20} color={THEME.black} />
+              </View>
+              <TouchableOpacity onPress={() => CarMakebottomSheetRef.current.open()} activeOpacity={0.8} style={styles.dropDown}>
+                <InputTitle title={'Car Model'} carMakeName={carMakeName} carModelName={carModelName} />
+                <Icon name='chevron-down' size={20} color={THEME.black} />
+              </TouchableOpacity>
+            </View>}
           {/* Year */}
-          <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
+          {mainCategory?.cid == 1 && <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
             <View style={styles.iconView}>
               <Icon name={'calendar'} size={20} color={THEME.black} />
             </View>
@@ -325,9 +403,9 @@ const AdsFornScreen = ({ navigation, route }) => {
               placeholderTextColor={THEME.black
               }
             />
-          </View>
+          </View>}
           {/* description */}
-          <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
+          {mainCategory?.cid == 1 && <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
             <View style={styles.iconView}>
               <Icon name={'speedometer'} size={20} color={THEME.black} />
             </View>
@@ -335,6 +413,20 @@ const AdsFornScreen = ({ navigation, route }) => {
               placeholder="KMs Driven"
               value={kmDriven}
               onChangeText={(text) => setKmDriven(text)}
+              style={styles.textInput}
+              placeholderTextColor={THEME.black
+              }
+            />
+          </View>}
+          {/* Title */}
+          <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
+            <View style={styles.iconView}>
+              <Icon name={'card-text-outline'} size={20} color={THEME.black} />
+            </View>
+            <TextInput
+              placeholder="Ad Title"
+              value={title}
+              onChangeText={(text) => setTitle(text)}
               style={styles.textInput}
               placeholderTextColor={THEME.black
               }
@@ -354,20 +446,7 @@ const AdsFornScreen = ({ navigation, route }) => {
               }
             />
           </View>
-          {/* Title */}
-          <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
-            <View style={styles.iconView}>
-              <Icon name={'card-text-outline'} size={20} color={THEME.black} />
-            </View>
-            <TextInput
-              placeholder="Ad Title"
-              value={title}
-              onChangeText={(text) => setTitle(text)}
-              style={styles.textInput}
-              placeholderTextColor={THEME.black
-              }
-            />
-          </View>
+
           {/* description */}
           <View style={[styles.dropDownContainer, { alignItems: 'center', marginTop: 15 }]}>
             <View style={styles.iconView}>
@@ -415,7 +494,28 @@ const AdsFornScreen = ({ navigation, route }) => {
               </View>
             </View>
           </View>
-          <TouchableOpacity disabled={loading}  onPress={() => handleSubmit()} style={[styles.btn, loading && { backgroundColor: THEME.lightGray }]} activeOpacity={0.8} >
+          <View style={styles.additionalNotesContainer}>
+            <Text style={styles.additionalNotesTitle}>{'Contact Information'}</Text>
+            {/* Conditions */}
+            {profile && <View style={styles.dropDownContainer}>
+              <View style={styles.iconView}>
+                <Icon name={'account-outline'} size={20} color={THEME.black} />
+              </View>
+              <View>
+                <Text style={styles.inputTitle}>{'Name'}</Text>
+                <TextInput
+                  // placeholder={profile?.user_name}
+                  value={profile?.user_name}
+                  // onChangeText={(text) => setDescription(text)}
+                  style={[styles.textInput, { width: "100%" }]}
+                  placeholderTextColor={THEME.black
+                  }
+                  editable={false}
+                />
+              </View>
+            </View>}
+          </View>
+          <TouchableOpacity disabled={loading} onPress={() => handleSubmit()} style={[styles.btn, loading && { backgroundColor: THEME.lightGray }]} activeOpacity={0.8} >
             <Text style={styles.btnTitle}>{loading ? 'Please wait' : 'Next'}</Text>
           </TouchableOpacity>
         </View>

@@ -76,8 +76,7 @@ function AppNavigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }} >
-      {/* <Stack.Screen name="OTP" component={OTP} /> */}
-
+      {/* <Stacks.Screen name="OTP" component={OTP} /> */}
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="AuthStack" component={AppAuthStack} />
          <Stack.Screen name="DrawerMenu" component={AppDrawer} />
@@ -90,7 +89,6 @@ function AppNavigation() {
         <Stack.Screen name ={'UserFavouriteScreen'} component={UserFavouriteScreen} />  
         <Stack.Screen name="AdsReelScreen" component={AdsReelScreen} />
         <Stack.Screen name="ViewUserAdScreen" component={ViewUserAdScreen} />
-
       </Stack.Navigator>
     </NavigationContainer>
   );
