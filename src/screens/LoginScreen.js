@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image, ScrollView, ToastAndroid } from 'react-native';
-import { TextInput, Button, Provider } from 'react-native-paper';
+import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image, ScrollView, } from 'react-native';
+import { TextInput, Button, } from 'react-native-paper';
 import CountryPicker from 'react-native-country-picker-modal'; // Import the country picker
 import { THEME, fontFamily } from '../theme/appTheme';
-import { LoggedWithGoogle, Login, SignUp, saveUserInfo, saveUserToken } from '../services';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { loggedWithSocial, Login, saveUserInfo, saveUserToken } from '../services';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { getDeviceId } from '../services';
 import Toast from 'react-native-toast-message';
-
 
 const SignInScreen = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -31,19 +29,19 @@ const SignInScreen = ({ navigation }) => {
         socialId: user?.id,
         loggedWith: 'google',
         isLogged: true,
-        phonecode : await getDeviceId(),
+        phonecode: await getDeviceId(),
       }
-      let response = await LoggedWithGoogle('api/loggedWithSocial', userProfile);
+      let response = await loggedWithSocial('api/loggedWithSocial', userProfile);
       let useResponse = await response.json();
       console.log('user profile details', useResponse);
-       if(useResponse && useResponse?.status == 200){
+      if (useResponse && useResponse?.status == 200) {
         saveUserToken();
         saveUserInfo(useResponse);
         navigation.replace('DrawerMenu');
-       } else if(useResponse && useResponse?.status == 400){
-        console.log('error',useResponse.errorcode )
-       } 
-       else {
+      } else if (useResponse && useResponse?.status == 400) {
+        console.log('error', useResponse.errorcode)
+      }
+      else {
         console.log('unable  to loggin with google');
       }
 
@@ -60,7 +58,6 @@ const SignInScreen = ({ navigation }) => {
       }
     }
   };
-
   React.useEffect(() => {
     setTimeout(() => {
       GoogleSignin.configure({
@@ -78,31 +75,30 @@ const SignInScreen = ({ navigation }) => {
     }, 1000);
   }, [])
 
-
   const handleSignIn = async () => {
     setLoading(true);
-   let deviceId = await getDeviceId()
+    let deviceId = await getDeviceId()
     let response = await Login(`api/login?user_mob=${phoneNumber}&user_pwd=${password}&phonecode=${deviceId}`, null);
     let res = await response?.json();
     if (response && (response?.status == 200 && res === 'mnf')) {
       setLoading(false)
       let error = THEME.error;
       Toast.show({
-          type: 'tomatoToast',
-          position: 'bottom',
-          props: { msg: 'User does not exist.', color: error },
+        type: 'tomatoToast',
+        position: 'bottom',
+        props: { msg: 'User does not exist.', color: error },
       });
       return
     } else if (response && (response?.status == 200 && res === 'rnc')) {
       setLoading(false)
       let error = THEME.error;
       Toast.show({
-          type: 'tomatoToast',
-          position: 'bottom',
-          props: { msg: 'Please complete your profile to continue.', color: error },
+        type: 'tomatoToast',
+        position: 'bottom',
+        props: { msg: 'Please complete your profile to continue.', color: error },
       });
-       navigation.replace('AddProfileScreen');
-    } 
+      navigation.replace('AddProfileScreen');
+    }
     else if (response && response.status == 200) {
       console.log('ssssss', res);
       setLoading(false)
@@ -114,118 +110,107 @@ const SignInScreen = ({ navigation }) => {
   const handleForgotPassword = () => {
     // Implement your "Forgot your password?" logic here
   };
-
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
     setSecurePassword(!securePassword);
   };
-
   return (
-    <Provider>
-      <ScrollView style={styles.container}>
-        <StatusBar backgroundColor={THEME.white} barStyle={'dark-content'} />
-        <Image source={require('../assets/login.png')} style={{
-          width: 300, height: 200, resizeMode: 'contain', alignSelf: 'center',  // Rotate the image by 90 degrees
-        }} />
-        <View style={{ top: 25 }}>
-          <Text style={styles.title}>Sign In</Text>
-          <Text style={styles.subtitle}>Let's start to sell</Text>
-        </View>
-        <View style={{ paddingTop: 16 }}>
-          <CountryPicker
-            {...{
-              countryCode: country.cca2,
-              withFilter: true,
-              withFlag: true,
-              withCountryNameButton: true,
-              withCallingCode: true,
-              withCallingCodeButton: true,
-              onSelect: (country) => setCountry(country),
+    <ScrollView style={styles.container}>
+      <StatusBar backgroundColor={THEME.white} barStyle={'dark-content'} />
+      <Image source={require('../assets/login.png')} style={{
+        width: 300, height: Platform.OS == 'android' ? 170 : 150, resizeMode: 'contain', alignSelf: 'center',  // Rotate the image by 90 degrees
+      }} />
+      <View style={{ top: 25 }}>
+        <Text style={styles.title}>Sign In</Text>
+        <Text style={styles.subtitle}>Let's start to sell</Text>
+      </View>
+      <View style={{ paddingTop: 16 }}>
+        <CountryPicker
+          {...{
+            countryCode: country.cca2,
+            withFilter: true,
+            withFlag: true,
+            withCountryNameButton: true,
+            withCallingCode: true,
+            withCallingCodeButton: true,
+            onSelect: (country) => setCountry(country),
+          }}
+          containerButtonStyle={styles.countryPicker}
+        />
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode='flat'
+            label="Phone Number"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            style={styles.input}
+            placeholderTextColor={THEME.black}
+            theme={{
+              colors: {
+                primary: THEME.primary,
+                accent: THEME.primary,
+                text: THEME.black,
+                placeholder: THEME.black,
+              },
             }}
-            containerButtonStyle={styles.countryPicker}
+            left={<TextInput.Icon icon="phone" size={24} color={THEME.primary} style={styles.inputIcon} />}
+            returnKeyType='done'
           />
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode='flat'
-              label="Phone Number"
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              style={styles.input}
-              theme={{
-                colors: {
-                  primary: THEME.primary,
-                  accent: THEME.primary,
-                  text: THEME.black,
-                  placeholder: THEME.lightGray,
-                },
-              }}
-              left={<TextInput.Icon icon="phone" size={24} color={THEME.primary} style={styles.inputIcon} />}
-
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <TextInput
-              mode='flat'
-              label="Password"
-              secureTextEntry={securePassword} // Toggle visibility based on the state
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              theme={{
-                colors: {
-                  primary: THEME.primary,
-                  accent: THEME.primary,
-                  text: THEME.black,
-                  placeholder: THEME.lightGray,
-                },
-              }}
-              right={<TextInput.Icon color={THEME.lightGray} icon={securePassword ? 'eye-off' : 'eye'} onPress={togglePasswordVisibility} />}
-              left={<TextInput.Icon icon="lock" size={24} color={THEME.primary} style={styles.inputIcon} />}
-            />
-          </View>
-          {/* <TouchableOpacity onPress={handleForgotPassword}>
+        </View>
+        <View style={styles.inputContainer}>
+          <TextInput
+            mode='flat'
+            label="Password"
+            secureTextEntry={securePassword} // Toggle visibility based on the state
+            value={password}
+            onChangeText={setPassword}
+            style={styles.input}
+            theme={{
+              colors: {
+                primary: THEME.primary,
+                accent: THEME.primary,
+                text: THEME.black,
+                placeholder: THEME.bla,
+              },
+            }}
+            right={<TextInput.Icon color={THEME.lightGray} icon={securePassword ? 'eye-off' : 'eye'} onPress={togglePasswordVisibility} />}
+            left={<TextInput.Icon icon="lock" size={24} color={THEME.primary} style={styles.inputIcon} />}
+          />
+        </View>
+        {/* <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={styles.forgotPassword}>Forgot your password?</Text>
           </TouchableOpacity> */}
-
-          <Button
-            mode="contained"
-            onPress={handleSignIn}
-            style={[styles.signInButton, { backgroundColor: (phoneNumber && password ? THEME.primary : THEME.lightGray) || (loading && THEME.lightGray) }]}
-            disabled={!phoneNumber || !password || loading}
-          >
-            Sign In
-          </Button>
-          <View style={styles.createAccountContainer}>
-            <Text>Don't have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
-              <Text style={styles.createAccountLink}>Create your account now</Text>
-            </TouchableOpacity>
-          </View>
+        <Button
+          mode="contained"
+          onPress={handleSignIn}
+          style={[styles.signInButton, loading ? { backgroundColor: THEME.lightGray } : { backgroundColor: (phoneNumber && password ? THEME.primary : THEME.lightGray) }]}
+          disabled={!phoneNumber || !password || loading}
+        >
+          Sign In
+        </Button>
+        <View style={styles.createAccountContainer}>
+          <Text>Don't have an account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
+            <Text style={styles.createAccountLink}>Create your account now</Text>
+          </TouchableOpacity>
         </View>
-        <View style={{ alignItems: 'center', alignSelf: 'center', marginVertical: 20 }}>
-          <Text style={styles.ortext}>OR</Text>
-          <View style={styles.socialButtonContainer}>
-            <Text>Continue with</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {/* <TouchableOpacity style={{ padding: 10, marginHorizontal: 6 }} onPress={() => loginWithFacebook()} activeOpacity={0.8}>
-                <Icon name={'facebook'} color={'#078BEA'} size={30} />
-              </TouchableOpacity> */}
-              <TouchableOpacity style={{ padding: 10, marginHorizontal: 10 }} onPress={() => loginWithGoogle()} >
-                <Icon name={'google'} color={'#4071D8'} size={30} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </ScrollView>
-    </Provider>
+      </View>
+      <View style={{ alignItems: 'center', alignSelf: 'center', marginVertical: 20 }}>
+        <Text style={styles.ortext}>OR</Text>
+        <TouchableOpacity onPress={() => loginWithGoogle()} activeOpacity={0.8} style={styles.socialButtonContainer}>
+          <Image style={styles.googleIcon} source={require('../assets/google3×.png')} />
+          <Text style={styles.googleTex}>Continue with Google</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS == 'android' ? 40 : 100,
+    paddingTop: Platform.OS == 'android' ? 40 : 80,
     paddingHorizontal: 20,
     backgroundColor: THEME.white,
   },
@@ -259,6 +244,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     backgroundColor: THEME.white,
+    color: THEME.black
   },
   forgotPassword: {
     fontSize: 14,
@@ -286,13 +272,29 @@ const styles = StyleSheet.create({
   socialButtonContainer: {
     flexDirection: 'row',
     marginVertical: 20,
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: THEME.grayRGBA,
+    paddingVertical: 8,
+    paddingHorizontal: 27,
+    borderRadius: 30,
   },
   ortext: {
     fontSize: 18,
     fontFamily: fontFamily.poppins_500,
     color: THEME.black,
     lineHeight: 22,
+  },
+  googleIcon: {
+    width: 26,
+    height: 26,
+    resizeMode: 'contain'
+  },
+  googleTex: {
+    fontSize: 13,
+    fontFamily: fontFamily.poppins_600,
+    lineHeight: 15,
+    color: THEME.black,
+    paddingLeft: 6
   }
 });
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Dimensions, TouchableOpacity, View, Text, ScrollView } from 'react-native';
+import { StyleSheet, Dimensions, TouchableOpacity, View, Text, ScrollView, Platform } from 'react-native';
 import { ImagebaseUrl } from '../services/apiConstant';
 import { THEME, fontFamily } from '../theme/appTheme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -62,7 +62,7 @@ export default function DetailsScreen({ navigation, route }) {
                     <Text style={styles.description}>{addHeadings?.add_detail}</Text>
                 </View>
             </ScrollView>
-            <View style={styles.btnContainer}>
+            <View style={[styles.btnContainer, Platform.OS == 'ios' && { marginBottom: 15 }]}>
                 <TouchableOpacity onPress={() => onCall()} activeOpacity={0.8} style={[styles.btn, { borderColor: 'blue' }]}>
                     <Icon name={'phone'} size={20} color={'blue'} />
                     <Text style={styles.btnTitle}>{'Call Now'}</Text>

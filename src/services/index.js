@@ -1,5 +1,5 @@
 // api/index.js
-import { fetchCategories, SignUp, Login, getDeviceId, verifyOTP, onCompleteProfile , subCategories, listCarMakes, listCarModels, AskSupport, LoadAskSupportMessages, PosAds, LoggedWithGoogle, saveUserInfo, saveUserToken,readUserInfo, removeUserToken, onAddToFavourite,onfetchReels, fetchUserAds} from './apiUtils';
+import { fetchCategories, SignUp, Login, getDeviceId, verifyOTP, onCompleteProfile , subCategories, listCarMakes, listCarModels, AskSupport, LoadAskSupportMessages, PosAds, loggedWithSocial, saveUserInfo, saveUserToken,readUserInfo, removeUserToken, onAddToFavourite,onfetchReels, fetchUserAds} from './apiUtils';
 
 export {
     fetchCategories,
@@ -14,7 +14,7 @@ export {
     AskSupport,
     LoadAskSupportMessages,
     PosAds,
-    LoggedWithGoogle,
+    loggedWithSocial,
     saveUserInfo,
     saveUserToken,
     readUserInfo,

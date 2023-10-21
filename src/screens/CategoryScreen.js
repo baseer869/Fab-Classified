@@ -5,6 +5,7 @@ import BackHeader from '../components/BackHeader'
 import { ImageBasePath } from '../services/apiConstant';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { fetchCategories } from '../services';
+import FastImage from 'react-native-fast-image';
 
 
 const CategoryScreen = ({ navigation }) => {
@@ -35,7 +36,7 @@ const filterBycategory = (category) =>{
 
   const renderItem = ({ item,  }) => (
     <TouchableOpacity  onPress={()=> filterBycategory(item)} activeOpacity={0.8} style={styles.categoryItem}>
-      <Image source={{ uri: `${ImageBasePath}/${item.purl}` }} style={styles.categoryImage} />
+      <FastImage resizeMode='contain' source={{ uri: `${ImageBasePath}/${item.purl}` }} style={styles.categoryImage} />
       <Text numberOfLines={2} style={styles.categoryTitle}>{item.title}</Text>
     </TouchableOpacity>
   );
@@ -120,7 +121,6 @@ const styles = StyleSheet.create({
   categoryImage: {
     width: 40,
     height: 40,
-    resizeMode: 'contain',
   },
   categoryTitle: {
     textAlign: 'center',

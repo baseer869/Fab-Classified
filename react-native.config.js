@@ -1,8 +1,9 @@
 module.exports = {
-    project: {
-        ios: {},
-        android: {}, // grouped into "project"
-    },
+    // project: {
+    //     ios: {},
+    //     android: {}, // grouped into "project"
+    // },
+    assets: ["./assets/fonts"], // stays the same
     dependencies: {
         "react-native-video": {
             platforms: {
@@ -12,5 +13,4 @@ module.exports = {
             },
         },
     },
-    assets: ["./src/assets/fonts/"], // stays the same
 };

@@ -113,7 +113,7 @@ export async function PosAds(url, data, token = false) {
   return Api(url, 'POST', data, token);
 }
 // POST request for google login
-export async function LoggedWithGoogle(url, data, token = false) {
+export async function loggedWithSocial(url, data, token = false) {
   return Api(url, 'POST', data, token);
 }
 // POST request for google login

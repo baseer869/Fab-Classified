@@ -4,7 +4,7 @@ import { THEME, fontFamily } from '../theme/appTheme'
 import { ImagebaseUrl } from '../services/apiConstant';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { classifiedAds, onAddToFavourite } from '../services/apiUtils';
-
+import FastImage from 'react-native-fast-image'
 
 const styles = StyleSheet.create({
   container: {
@@ -110,7 +110,7 @@ const ClassifiedItem = (item, index, addToFavourite) => {
   let addToFavPaylooad = { add_id: addHeadings?.add_id, user_id: 'logged user id ' };
   return (
     <TouchableOpacity onPress={() => item?.navigation.navigate('DetailsScreen', { itemDetails })} activeOpacity={0.7} style={[styles.itemContainer, {}]}>
-      <Image source={{ uri: `${ImagebaseUrl}/${addImage[0]?.image_name}` }} style={styles.image} />
+      <FastImage source={{ uri: `${ImagebaseUrl}/${addImage[0]?.image_name}` }} style={styles.image} />
       <View style={styles.direction}>
         <View style={{ paddingVertical: 6, paddingHorizontal: 8, alignItems: 'flex-start' }}>
           <Text numberOfLines={1} style={styles.Adtitle} >{addHeadings?.add_title}</Text>
@@ -155,7 +155,7 @@ const AdsListingScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={THEME.white} />
-      <Image source={require('../assets/fab-logo.jpg')} style={styles.appLogo} />
+      <FastImage source={require('../assets/fab-logo.jpg')} style={styles.appLogo} />
       {loading ? <ActivityIndicator animating={loading} size={26} /> :
         <ScrollView style={styles.innerContainer}>
             <SearchInput  onSearchClick={onSearchClick} />

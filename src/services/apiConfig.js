@@ -9,7 +9,7 @@ export const API_BASE_URL = 'https://fabkw.com/';
 
 // TWILIO 
 const ACCOUNT_SID = 'AC8f370cf9162a357dcdcc6b26e8cae742';
-const AUTH_TOKEN = 'd9ee12eb4a68e2d7b2268c1c0fc1863c';
+const AUTH_TOKEN = 'f39deb38d648e60679f8b03eab841ccf';
 const SERVICE_SID = 'VA9965ca3fc61a7cfb7db003c6ffe74682';
 
 export {

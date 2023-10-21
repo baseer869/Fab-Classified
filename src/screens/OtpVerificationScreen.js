@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { THEME } from '../theme/appTheme';
-import { getDeviceId } from '../services/apiUtils';
-import { SignUp } from '../services';
+import { getDeviceId, loggedWithSocial, saveUserInfo, saveUserToken } from '../services/apiUtils';
 import axios from 'axios';
 import { encode } from 'base-64';
 import Toast from 'react-native-toast-message';
@@ -11,22 +10,12 @@ import { ACCOUNT_SID, AUTH_TOKEN, SERVICE_SID } from '../services/apiConfig';
 
 const OtpVerificationScreen = ({ navigation, route }) => {
     let { phoneNumber } = route?.params;
-    console.log('phone number', phoneNumber);
     const [otp, setOtp] = useState(['', '', '', '',]);
     const inputRefs = [useRef(), useRef(), useRef(), useRef()];
     const [isOtpComplete, setIsOtpComplete] = useState(false);
     const [focusedInput, setFocusedInput] = useState(-1);
     const [loading, setLoading] = useState(false);
     const [buttonStatusMsg, setButtonStatusMsg] = useState('Verifying OTP')
-    const handleOtpChange = (index, value) => {
-        if (value.length === 1 && index < 3) {
-            inputRefs[index + 1].current.focus();
-        }
-
-        const newOtp = [...otp];
-        newOtp[index] = value;
-        setOtp(newOtp);
-    };
 
     useEffect(() => {
         // Check if all OTP digits are filled
@@ -34,6 +23,16 @@ const OtpVerificationScreen = ({ navigation, route }) => {
         setIsOtpComplete(isComplete);
     }, [otp]);
 
+    const handleOtpChange = (index, value) => {
+        if (value.length === 1 && index < 3) {
+            inputRefs[index + 1].current.focus();
+        }
+        const newOtp = [...otp];
+        newOtp[index] = value;
+        setOtp(newOtp);
+    };
+
+    // Verify OTP
     const onVerifyOTP = async () => {
         // TWILIO OTP
         setLoading(true);
@@ -53,7 +52,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 "Channel": "sms",
             }, axiosConfig)
             .then(async response => {
-                console.log('Verification request successful', response?.status);
+                console.log('Verification request successful', response);
                 if (response && response?.status == 200 && response?.data?.valid == false) {
                     setLoading(false);
                     Toast.show({
@@ -61,21 +60,54 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                         position: 'bottom',
                         props: { msg: 'Invalid OTP', color: THEME.error },
                     });
-                } if (response && response?.status == 200 && response?.data?.status == "approved") {
+                } if (response && response?.status == 200 && response?.data?.status == "pending") {
                     setButtonStatusMsg('Creating profile...')
                     let deviceId = await getDeviceId();
-                    const phoneId = deviceId;
-                    let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
-                    let res = await response.json();
-                    if (response?.status == 200) {
-                        console.log('user registered success');
+
+                    // Old API
+
+                    // const phoneId = deviceId;
+                    // let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
+                    // let res = await response.json();
+                    // if (response?.status == 200) {
+                    //     console.log('user registered success');
+                    //     setLoading(false);
+                    //     navigation.replace('AddProfileScreen', { userid: response?.userid });
+                    // } else {
+                    //     console.log('user registered failed');
+                    //     setLoading(false);
+                    //     console.log('response of sign==>', response);
+                    // }
+
+                    // New API
+                    let userProfile = {
+                        phonecode: await getDeviceId(),
+                        user_mob: phoneNumber,
+                        user_code: code,
+                        loggedWith: 'phoneNumber',
+                        isLogged: true,
+                        userToken: null,
+                        email: null,
+                        name: null,
+                        photo: null,
+                        socialId: null,
+                    }
+                    console.log('user profile payload==>', userProfile);
+                    let response = await loggedWithSocial('api/loggedWithSocial', userProfile);
+                    let useResponse = await response.json();
+                    console.log('user profile creation response', useResponse);
+                    if (useResponse && useResponse?.status == 200) {
+                        // saveUserToken();
+                        // saveUserInfo(useResponse);
                         setLoading(false);
                         navigation.replace('AddProfileScreen', { userid: response?.userid });
-                    } else {
-                        console.log('user registered failed');
-                        setLoading(false);
-                        console.log('response of sign==>', response);
+                    } else if (useResponse && useResponse?.status == 400) {
+                        console.log('error', useResponse.errorcode)
                     }
+                    else {
+                        console.log('unable  to loggin with google');
+                    }
+
                 }
                 return response;
             })
@@ -96,14 +128,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 }
             });
     }
-
-    const handleInputBlur = (index) => {
-        setFocusedInput(-1);
-    };
-
-    const handleInputFocus = (index) => {
-        setFocusedInput(index);
-    };
+    //  Handle Resend OTP
     const handleResendOTP = async (phoneNumber) => {
         setLoading(true);
         setButtonStatusMsg('Verify')
@@ -151,6 +176,12 @@ const OtpVerificationScreen = ({ navigation, route }) => {
             });
 
     };
+    const handleInputBlur = (index) => {
+        setFocusedInput(-1);
+    };
+    const handleInputFocus = (index) => {
+        setFocusedInput(index);
+    };
     return (
         <Provider>
             <ScrollView style={styles.container}>
@@ -186,10 +217,11 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                                     maxLength={1}
                                     onBlur={() => handleInputBlur(index)}
                                     onFocus={() => handleInputFocus(index)}
+                                    returnKeyType='done'
                                 />
                             ))}
                         </View>
-                        <TouchableOpacity style={{ padding:10, alignSelf:'flex-end'}} activeOpacity={0.5} onPress={()=> handleResendOTP(phoneNumber)} >
+                        <TouchableOpacity style={{ padding: 10, alignSelf: 'flex-end' }} activeOpacity={0.5} onPress={() => handleResendOTP(phoneNumber)} >
                             <Text>Resend</Text>
                         </TouchableOpacity>
                     </View>
@@ -197,7 +229,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                     <Button
                         mode="contained"
                         onPress={onVerifyOTP}
-                        style={[styles.resendButton, loading ? {  backgroundColor: THEME.lightGray }: isOtpComplete ? {  backgroundColor: THEME.primary }: {  backgroundColor: THEME.lightGray } ]}
+                        style={[styles.resendButton, loading ? { backgroundColor: THEME.lightGray } : isOtpComplete ? { backgroundColor: THEME.primary } : { backgroundColor: THEME.lightGray }]}
                         disabled={!isOtpComplete || loading}
                     >
                         {loading ? buttonStatusMsg : "Verify"}

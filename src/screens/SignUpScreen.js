@@ -1,14 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { TextInput, Button, Checkbox, Provider } from 'react-native-paper';
 import CountryPicker from 'react-native-country-picker-modal';
 import { THEME, fontFamily } from '../theme/appTheme';
 import axios from 'axios';
 import { encode } from 'base-64';
 import Toast from 'react-native-toast-message';
-import { ACCOUNT_SID, AUTH_TOKEN,SERVICE_SID } from '../services/apiConfig';
+import { ACCOUNT_SID, AUTH_TOKEN, SERVICE_SID } from '../services/apiConfig';
 import TermsCondition from '../components/TermsCondition';
-
 
 const SignUpScreen = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -23,18 +22,18 @@ const SignUpScreen = ({ navigation }) => {
 
     const onOpenterms = () => {
         termRef?.current.open();
-      }
+    }
     const onCloseterms = () => {
         termRef?.current.close();
-      }
-      const onOpenPrivacy  = () => {
+    }
+    const onOpenPrivacy = () => {
         termRef?.current.open();
         if (PrivacyRef.current) {
             // Replace 'textRef' with the ref of the Text element you want to scroll to
             const yOffset = textRef.current;
             PrivacyRef.current.scrollTo({ y: yOffset, animated: true });
-          }
-      }
+        }
+    }
 
     useEffect(() => {
         // Enable the Sign Up button when all form fields are filled
@@ -45,7 +44,7 @@ const SignUpScreen = ({ navigation }) => {
         }
     }, [phoneNumber, username, isChecked]);
 
-
+// SIGN UP
     const handleSignUp = async () => {
         setLoading(true);
         const base64Credentials = encode(`${ACCOUNT_SID}:${AUTH_TOKEN}`);
@@ -97,10 +96,10 @@ const SignUpScreen = ({ navigation }) => {
     };
     return (
         <Provider>
-            <View style={styles.container}>
+            <ScrollView style={styles.container}>
                 <StatusBar backgroundColor={THEME.white} barStyle={'dark-content'} />
                 <Image source={require('../assets/signup.png')} style={{
-                    width: 300, height: 200, resizeMode: 'contain', alignSelf: 'center',  // Rotate the image by 90 degrees
+                    width: 300, height: Platform.OS == 'android' ? 170 : 150, resizeMode: 'contain', alignSelf: 'center',  // Rotate the image by 90 degrees
                 }} />
                 <View style={{ top: 25 }}>
                     <Text style={styles.title}>Create a New Account</Text>
@@ -132,10 +131,11 @@ const SignUpScreen = ({ navigation }) => {
                                     primary: THEME.primary,
                                     accent: THEME.primary,
                                     text: THEME.black,
-                                    placeholder: THEME.lightGray,
+                                    placeholder: THEME.black,
                                 },
                             }}
                             disabled={loading}
+                            returnKeyType='done'
                         />
                     </View>
                 </View>
@@ -163,11 +163,11 @@ const SignUpScreen = ({ navigation }) => {
                 </Button>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingTop: 20 }}>
                     <Text style={styles.infoText}>Already have an account?</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} style={{ padding: 2 }}>
+                    <TouchableOpacity disabled={loading} onPress={() => navigation.navigate('LoginScreen')} style={{ padding: 2 }}>
                         <Text style={styles.signInText}>Sign In</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </ScrollView>
             <TermsCondition PrivacyRef={PrivacyRef} termRef={termRef} onCloseterms={onCloseterms} />
         </Provider>
     );
@@ -224,7 +224,8 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: THEME.white,
-        width: "90%"
+        width: "90%",
+        color: THEME.black
     },
     checkboxContainer: {
         flexDirection: 'row',
@@ -234,8 +235,9 @@ const styles = StyleSheet.create({
     },
     checkboxLabel: {
         fontSize: 12,
-        marginLeft: 10,
-        fontFamily: 'Montserrat-Medium'
+        marginHorizontal: 10,
+        fontFamily: 'Montserrat-Medium',
+        flex: 1,
     },
     signUpButton: {
         marginTop: 20,
