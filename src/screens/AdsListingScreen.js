@@ -1,9 +1,9 @@
-import { SafeAreaView, StatusBar, StyleSheet,ScrollView, Text, View, Image, TextInput, FlatList, TouchableOpacity, Platform, ActivityIndicator } from 'react-native'
+import { SafeAreaView, StatusBar, StyleSheet, ScrollView, Text, View, Image, TextInput, FlatList, TouchableOpacity, Platform, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import { THEME, fontFamily } from '../theme/appTheme'
 import { ImagebaseUrl } from '../services/apiConstant';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {  classifiedAds, onAddToFavourite } from '../services/apiUtils';
+import { classifiedAds, onAddToFavourite } from '../services/apiUtils';
 
 
 const styles = StyleSheet.create({
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 103,
     borderTopLeftRadius: 10,
-    borderTopRightRadius:10,
+    borderTopRightRadius: 10,
   },
   itemContainer: {
     borderRadius: 10,
@@ -89,17 +89,17 @@ const SearchInput = ({ onSearchClick }) => {
       placeholder="Search Anything on Fab Classified"
       style={styles.input}
       editable={false} // Make the TextInput disabled
-      onPressIn={() => onSearchClick()}
+      onPressOut={()=> onSearchClick()}
     />
   );
 };
 
-export const CarAdsDetails = ({addHeadings}) => {
+export const CarAdsDetails = ({ addHeadings }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      { addHeadings?.km_driven && <Text style={styles.featureText}>{`${addHeadings?.km_driven} km`}</Text>}
-     { addHeadings?.fuel_type && <Text style={styles.featureText}>{`- ${addHeadings?.fuel_type}`}</Text>}
-     { addHeadings?.location && <Text style={styles.featureText}>{`- ${addHeadings?.location}`}</Text>}
+      {addHeadings?.km_driven && <Text style={styles.featureText}>{`${addHeadings?.km_driven} km`}</Text>}
+      {addHeadings?.fuel_type && <Text style={styles.featureText}>{`- ${addHeadings?.fuel_type}`}</Text>}
+      {addHeadings?.location && <Text style={styles.featureText}>{`- ${addHeadings?.location}`}</Text>}
     </View>
   )
 }
@@ -107,7 +107,7 @@ export const CarAdsDetails = ({addHeadings}) => {
 const ClassifiedItem = (item, index, addToFavourite) => {
   let { addHeadings, addImage, addPersonalInfo, fav, addData } = item;
   let itemDetails = { addData, addHeadings, addPersonalInfo, addImage };
-  let addToFavPaylooad ={ add_id: addHeadings?.add_id, user_id: 'logged user id '};
+  let addToFavPaylooad = { add_id: addHeadings?.add_id, user_id: 'logged user id ' };
   return (
     <TouchableOpacity onPress={() => item?.navigation.navigate('DetailsScreen', { itemDetails })} activeOpacity={0.7} style={[styles.itemContainer, {}]}>
       <Image source={{ uri: `${ImagebaseUrl}/${addImage[0]?.image_name}` }} style={styles.image} />
@@ -135,7 +135,7 @@ const AdsListingScreen = ({ navigation }) => {
     navigation.navigate('DrawerMenu', { screen: 'CategoriesScreen' })
   }
   // Add to Favourite
-  const addToFavourite = async (item) =>{
+  const addToFavourite = async (item) => {
     console.log('item to fav', item);
     // let FavResponse = await onAddToFavourite(item);
     console.log('respnse of fav', FavResponse);
@@ -156,18 +156,18 @@ const AdsListingScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={THEME.white} />
       <Image source={require('../assets/fab-logo.jpg')} style={styles.appLogo} />
-      {loading ? <ActivityIndicator animating={loading} /> : 
-      <ScrollView style={styles.innerContainer}>
-        <SearchInput onSearchClick={onSearchClick} />
-        <Text style={styles.title}>{`${ClassifiedAds?.length} products found`}</Text>
-        <FlatList
-          numColumns={2}
-          data={ClassifiedAds}
-          renderItem={({ item, index }) => <ClassifiedItem  {...item} index={index} navigation={navigation} addToFavourite={addToFavourite} />}
-          contentContainerStyle={{ marginTop: "4%" }}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+      {loading ? <ActivityIndicator animating={loading} size={26} /> :
+        <ScrollView style={styles.innerContainer}>
+            <SearchInput  onSearchClick={onSearchClick} />
+          <Text style={styles.title}>{`${ClassifiedAds?.length} products found`}</Text>
+          <FlatList
+            numColumns={2}
+            data={ClassifiedAds}
+            renderItem={({ item, index }) => <ClassifiedItem  {...item} index={index} navigation={navigation} addToFavourite={addToFavourite} />}
+            contentContainerStyle={{ marginTop: "4%" }}
+            showsVerticalScrollIndicator={false}
+          />
+        </ScrollView>
       }
     </SafeAreaView>
   )

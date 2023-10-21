@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
-import AdsReelScreen from '../screens/AdsReelScreen';
+import AdsReelScreen from '../screens/VideoPlay';
 import SplashScreen from '../screens/SplashScreen';
 import DrawerContent from './DrawerMenu';
 import CategoryScreen from '../screens/CategoryScreen';
@@ -31,6 +31,8 @@ import { AdFileUploadScreen} from '../screens/AdUploadFileScreen';
 import UserFavouriteScreen from '../screens/UserFavouriteScreen';
 import OTP from '../screens/OTP';
 import ViewUserAdScreen from '../screens/ViewUserAdScreen';
+import VideoPlayer from '../screens/VideoPlay';
+import FilterAdsListingScreen from '../screens/FilterAdsScreen';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -77,9 +79,12 @@ function AppNavigation() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }} >
       {/* <Stacks.Screen name="OTP" component={OTP} /> */}
+      {/* <Stack.Screen name="VideoPlayer" component={VideoPlayer} /> */}
+
         <Stack.Screen name="SplashScreen" component={SplashScreen} />
         <Stack.Screen name="AuthStack" component={AppAuthStack} />
          <Stack.Screen name="DrawerMenu" component={AppDrawer} />
+        <Stack.Screen name ={'FilterAdsListingScreen'} component={FilterAdsListingScreen} />
         <Stack.Screen name ={'DetailsScreen'} component={DetailsScreen} />
         <Stack.Screen name ={'CategorySelectionScreen'} component={CategorySelectionScreen} /> 
         <Stack.Screen name ={'SubCategories1'} component={SubCategories1} /> 
@@ -88,6 +93,7 @@ function AppNavigation() {
         <Stack.Screen name ={'UserAdScreen'} component={UserAdScreen} />
         <Stack.Screen name ={'UserFavouriteScreen'} component={UserFavouriteScreen} />  
         <Stack.Screen name="AdsReelScreen" component={AdsReelScreen} />
+
         <Stack.Screen name="ViewUserAdScreen" component={ViewUserAdScreen} />
       </Stack.Navigator>
     </NavigationContainer>

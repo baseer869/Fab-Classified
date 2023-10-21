@@ -4,7 +4,7 @@ import { TextInput, Button, Checkbox, HelperText, Provider } from 'react-native-
 import CountryPicker from 'react-native-country-picker-modal';
 import { THEME, fontFamily } from '../theme/appTheme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getDeviceId, onCompleteProfile } from '../services';
+import { LoggedWithGoogle, getDeviceId, onCompleteProfile } from '../services';
 import { API_BASE_URL } from '../services/apiConfig';
 
 const AddProfileScreen = ({ navigation, route }) => {
@@ -31,9 +31,36 @@ const AddProfileScreen = ({ navigation, route }) => {
     let response = await onCompleteProfile(`api/complete-profile?name=${username}&pwd=${password}&confirmpwd=${confirmPassword}&uid=${userid}`, null);
     console.log('response of complete', response);
     let res = await response.json();
-    console.log('resss', res);
+    console.log('response of user profile complete==>', res);
     if (response && response.status == 200) {
-      navigation.navigate('DrawerMenu');
+          //       saveUserToken();
+          // saveUserInfo(useResponse);
+
+         //
+      //    let userProfile = {
+      //     userToken: userInfo?.idToken,
+      //     email: user.email,
+      //     name: user?.name,
+      //     photo: user?.photo,
+      //     socialId: user?.id,
+      //     loggedWith: 'google',
+      //     isLogged: true,
+      //     phonecode : await getDeviceId(),
+      //   }
+      //   let response = await LoggedWithGoogle('api/loggedWithSocial', userProfile);
+      //   let useResponse = await response.json();
+      //   console.log('user profile details', useResponse);
+      //    if(useResponse && useResponse?.status == 200){
+      //     saveUserToken();
+      //     saveUserInfo(useResponse);
+      //     navigation.replace('DrawerMenu');
+      //    } else if(useResponse && useResponse?.status == 400){
+      //     console.log('error',useResponse.errorcode )
+      //    } 
+      //    else {
+      //     console.log('unable  to loggin with google');
+      //   }
+      // navigation.navigate('DrawerMenu');
     }
 
     // You can access the form data: phoneNumber, username, password, isChecked, and selectedCountry

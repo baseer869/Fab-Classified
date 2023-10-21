@@ -133,7 +133,7 @@ export function AdFileUploadScreen({ route, navigation }) {
         },
       });
       setLoading(false)
-      navigation.replace('DrawerMenu', { screen: 'ProfileScreen' })
+      navigation.replace('DrawerMenu')
     } catch (error) {
       console.error('image upload error:', error);
     }

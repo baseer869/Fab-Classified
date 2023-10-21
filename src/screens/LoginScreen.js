@@ -82,7 +82,7 @@ const SignInScreen = ({ navigation }) => {
   const handleSignIn = async () => {
     setLoading(true);
    let deviceId = await getDeviceId()
-    let response = await Login(`api/login?user_mob=${phoneNumber}&user_pwd=${password}&phonecode=${888}`, null);
+    let response = await Login(`api/login?user_mob=${phoneNumber}&user_pwd=${password}&phonecode=${deviceId}`, null);
     let res = await response?.json();
     if (response && (response?.status == 200 && res === 'mnf')) {
       setLoading(false)
@@ -184,9 +184,9 @@ const SignInScreen = ({ navigation }) => {
               left={<TextInput.Icon icon="lock" size={24} color={THEME.primary} style={styles.inputIcon} />}
             />
           </View>
-          <TouchableOpacity onPress={handleForgotPassword}>
+          {/* <TouchableOpacity onPress={handleForgotPassword}>
             <Text style={styles.forgotPassword}>Forgot your password?</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <Button
             mode="contained"
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   signInButton: {
-    marginTop: 10,
+    marginTop: 20,
     backgroundColor: THEME.primary,
     borderRadius: 8,
     height: 44

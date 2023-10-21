@@ -7,12 +7,13 @@ import { PhoneButton } from '../components/AdsComponent';
 import MenuHeader from '../components/MenuHeader';
 import { classifiedAds, onCallNow, onWhatsAppNow } from '../services/apiUtils';
 
-const CommercialItem = ({ addHeadings,addVideos, addImage, addPersonalInfo, index, onWhatApp, onCall, onItemClick }) => {
+const CommercialItem = ({ addHeadings, addVideos, addImage, addPersonalInfo, index, onWhatApp, onCall, onItemClick }) => {
     let videoReel = {
         "user_id": addHeadings?.user_id,
         "video_id": 14,
         addPersonalInfo: addPersonalInfo,
-        video_url: addVideos?.video_url
+        video_url: addVideos?.video_url,
+        images: addImage
     }
     return (
         <View style={styles.CommercialItemContainer}>
@@ -25,8 +26,8 @@ const CommercialItem = ({ addHeadings,addVideos, addImage, addPersonalInfo, inde
                 </TouchableOpacity>
             </ImageBackground>
             <View style={styles.spacing}>
-                <PhoneButton onButtonPress={()=> onWhatApp(addPersonalInfo[0]?.user_mob)} title={'Whatsapp'} icon={'whatsapp'} color={'green'} />
-                <PhoneButton onButtonPress={()=> onCall(addPersonalInfo[0]?.user_mob)} title={'Call Now'} icon={'phone'} color={'blue'} />
+                <PhoneButton onButtonPress={() => onWhatApp(addPersonalInfo[0]?.user_mob)} title={'Whatsapp'} icon={'whatsapp'} color={'green'} />
+                <PhoneButton onButtonPress={() => onCall(addPersonalInfo[0]?.user_mob)} title={'Call Now'} icon={'phone'} color={'blue'} />
             </View>
         </View>
 
@@ -39,7 +40,7 @@ const HomeScreen = ({ navigation }) => {
     const onMenuClick = () => { navigation.openDrawer() };
     const onNotificationClick = () => {
         navigation.navigate('OTP')
-     };
+    };
     const [commercialAds, setCommercialAds] = useState([]);
     // 
     const fetchCommercialAds = async () => {
@@ -52,8 +53,8 @@ const HomeScreen = ({ navigation }) => {
         fetchCommercialAds();
     }, []);
 
-    const onItemClick = (item) =>{
-       navigation.navigate('AdsReelScreen', { item });
+    const onItemClick = (item) => {
+        navigation.navigate('AdsReelScreen', { item });
     }
     const onCall = (phone) => {
         onCallNow(phone);
@@ -61,23 +62,24 @@ const HomeScreen = ({ navigation }) => {
     const onWhatsApp = (phone) => {
         onWhatsAppNow(phone);
     };
-const onMainBannerClick = () =>{
-//   console.log('commercialAds at thirt place', commercialAds[3]);
-  let  { addHeadings,addPersonalInfo, addVideos} = commercialAds[1];
-    let item = {
-        "user_id": addHeadings?.user_id,
-        addPersonalInfo: addPersonalInfo,
-        video_url: addVideos?.video_url
+    const onMainBannerClick = () => {
+        //   console.log('commercialAds at thirt place', commercialAds[3]);
+        let { addHeadings, addPersonalInfo, addVideos, addImage } = commercialAds[0];
+        let item = {
+            "user_id": addHeadings?.user_id,
+            addPersonalInfo: addPersonalInfo,
+            video_url: addVideos?.video_url,
+            images: addImage
+        }
+        navigation.navigate('AdsReelScreen', { item })
     }
-    navigation.navigate('AdsReelScreen', { item })
-}
     return (
         <ScrollView scrollEnabled={true} contentContainerStyle={styles.container}>
             <StatusBar backgroundColor={'rgba(255, 0, 0, 0.41)'} />
             <MenuHeader onMenuClick={onMenuClick} onNotificationClick={onNotificationClick} />
             <ImageBackground
                 resizeMode='cover'
-                source={{ uri: `${ImagebaseUrl}${commercialAds[1]?.addImage[0]?.image_name}` }}
+                source={{ uri: `${ImagebaseUrl}${commercialAds[0]?.addImage[0]?.image_name}` }}
                 style={{ height: "62%", width: "100%", }}
             >
                 {/* <TouchableOpacity onPress={() => onMainBannerClick()} style={styles.playButton} >
@@ -103,7 +105,7 @@ const onMainBannerClick = () =>{
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     data={commercialAds}
-                    renderItem={({ item, index }) => < CommercialItem onWhatApp={onWhatsApp} onCall={onCall} onButtonPress={onPhoneContactHandler}  onItemClick={onItemClick} {...item} index={index} />}
+                    renderItem={({ item, index }) => < CommercialItem onWhatApp={onWhatsApp} onCall={onCall} onButtonPress={onPhoneContactHandler} onItemClick={onItemClick} {...item} index={index} />}
                 />
             </View>
         </ScrollView>

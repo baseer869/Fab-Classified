@@ -5,7 +5,7 @@ import { THEME, fontFamily } from '../theme/appTheme';
 import { Introduction, acceptance } from '../services/constantData';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const TermsCondition = ({ termRef, onCloseterms }) => {
+const TermsCondition = ({ termRef, onCloseterms, PrivacyRef }) => {
     return (
         <RBSheet
             ref={termRef}
@@ -26,7 +26,7 @@ const TermsCondition = ({ termRef, onCloseterms }) => {
                 <View style={{ paddingVertical: 20 }}>
                     <Text style={[styles.title, { fontSize: 18, paddingVertical: 12 }]}>Introduction</Text>
                     <Text style={styles.IntroductionTerms}>{Introduction}</Text>
-                    <Text style={[styles.title, { fontSize: 18, paddingVertical: 12 }]}>Acceptance of the Terms of Use</Text>
+                    <Text ref={PrivacyRef} style={[styles.title, { fontSize: 18, paddingVertical: 12 }]}>Acceptance of the Terms of Use</Text>
                     <Text style={styles.IntroductionTerms}>{acceptance}</Text>
                 </View>
             </ScrollView>

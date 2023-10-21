@@ -26,8 +26,15 @@ const CategoryScreen = ({ navigation }) => {
     fetch();
   }, []);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity  onPress={()=> console.log('render item')} activeOpacity={0.8} style={styles.categoryItem}>
+const filterBycategory = (category) =>{
+  let {cid, title} = category;
+  let filterby = { cid, title};
+  console.log('item categry', category);
+  navigation.navigate('FilterAdsListingScreen', { filterby })
+}
+
+  const renderItem = ({ item,  }) => (
+    <TouchableOpacity  onPress={()=> filterBycategory(item)} activeOpacity={0.8} style={styles.categoryItem}>
       <Image source={{ uri: `${ImageBasePath}/${item.purl}` }} style={styles.categoryImage} />
       <Text numberOfLines={2} style={styles.categoryTitle}>{item.title}</Text>
     </TouchableOpacity>
@@ -56,6 +63,9 @@ const CategoryScreen = ({ navigation }) => {
       )}
     </View>
   );
+
+
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor={THEME.primary} />

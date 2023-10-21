@@ -10,7 +10,7 @@ const MenuHeader = ({ onMenuClick , onNotificationClick}) => {
             <TouchableOpacity onPress={()=> onMenuClick()} activeOpacity={0.8}  style={styles.menuItemStyle} >
                 <Icon name={'menu'} size={22} color={THEME.white} />
             </TouchableOpacity>
-            <Image  source={require('../assets/fab.png')}  style={{  width:100, height:30, left:120 }}/>
+            <Image  source={require('../assets/fab.png')}  style={{  width:100, height:30, left:100 }}/>
             {/* <TouchableOpacity  onPress={()=> onNotificationClick()} activeOpacity={0.8} style={styles.menuItemStyle} >
                 <Icon name={'bell'} size={22} color={THEME.white} />
             </TouchableOpacity> */}

@@ -1,15 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, StatusBar, Platform, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, StatusBar, Platform, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { THEME } from '../theme/appTheme';
-import { getDeviceId, verifyOTP } from '../services/apiUtils';
+import { getDeviceId } from '../services/apiUtils';
 import { SignUp } from '../services';
 import axios from 'axios';
 import { encode } from 'base-64';
 import Toast from 'react-native-toast-message';
+import { ACCOUNT_SID, AUTH_TOKEN, SERVICE_SID } from '../services/apiConfig';
 
 const OtpVerificationScreen = ({ navigation, route }) => {
-    let { phoneNumber } = route?.params
+    let { phoneNumber } = route?.params;
+    console.log('phone number', phoneNumber);
     const [otp, setOtp] = useState(['', '', '', '',]);
     const inputRefs = [useRef(), useRef(), useRef(), useRef()];
     const [isOtpComplete, setIsOtpComplete] = useState(false);
@@ -35,11 +37,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
     const onVerifyOTP = async () => {
         // TWILIO OTP
         setLoading(true);
-        const accountSid = 'AC2614c158a71c453e081884d57aa818ec';
-        const authToken = '9572e984473c190550a96a71de627e98';
-        const serviceSid = 'VA11b7f786f210e0efdfc150f49bfaddac'; // Service SID for your Verify service
-        // Encode the credentials with base-64
-        const base64Credentials = encode(`${accountSid}:${authToken}`);
+        const base64Credentials = encode(`${ACCOUNT_SID}:${AUTH_TOKEN}`);
         const axiosConfig = {
             headers: {
                 'Authorization': `Basic ${base64Credentials}`,
@@ -49,8 +47,8 @@ const OtpVerificationScreen = ({ navigation, route }) => {
         var code = String(otp);
         code = code.replace(/\,/g, ''); // This removes all commas
         axios
-            .post(`https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`, {
-                "To": `+${phoneNumber}`,
+            .post(`https://verify.twilio.com/v2/Services/${SERVICE_SID}/VerificationCheck`, {
+                "To": `${phoneNumber}`,
                 "Code": `${code}`,
                 "Channel": "sms",
             }, axiosConfig)
@@ -58,11 +56,10 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 console.log('Verification request successful', response?.status);
                 if (response && response?.status == 200 && response?.data?.valid == false) {
                     setLoading(false);
-                    let error = THEME.error;
                     Toast.show({
                         type: 'tomatoToast',
                         position: 'bottom',
-                        props: { msg: 'Invalid OTP', color: error },
+                        props: { msg: 'Invalid OTP', color: THEME.error },
                     });
                 } if (response && response?.status == 200 && response?.data?.status == "approved") {
                     setButtonStatusMsg('Creating profile...')
@@ -73,7 +70,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                     if (response?.status == 200) {
                         console.log('user registered success');
                         setLoading(false);
-                        navigation.replace('AddProfileScreen', {userid: response?.userid });
+                        navigation.replace('AddProfileScreen', { userid: response?.userid });
                     } else {
                         console.log('user registered failed');
                         setLoading(false);
@@ -87,11 +84,10 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                     setLoading(false);
                     if (error.response?.status == 404) {
                         setLoading(false);
-                        let info = THEME.info;
                         Toast.show({
                             type: 'tomatoToast',
                             position: 'bottom',
-                            props: { msg: 'something went wrong try again.', color: info },
+                            props: { msg: 'something went wrong try again.', color: THEME.info },
                         });
                     }
                 } else {
@@ -108,7 +104,53 @@ const OtpVerificationScreen = ({ navigation, route }) => {
     const handleInputFocus = (index) => {
         setFocusedInput(index);
     };
+    const handleResendOTP = async (phoneNumber) => {
+        setLoading(true);
+        setButtonStatusMsg('Verify')
+        const base64Credentials = encode(`${ACCOUNT_SID}:${AUTH_TOKEN}`);
+        const axiosConfig = {
+            headers: {
+                'Authorization': `Basic ${base64Credentials}`,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+        };
+        // console.log('sign up with:', `${selectedCountry?.callingCode}${phoneNumber}`);
+        axios
+            .post(`https://verify.twilio.com/v2/Services/${SERVICE_SID}/Verifications`, {
+                "To": `$${phoneNumber}`,
+                "Channel": "sms",
+            }, axiosConfig)
+            .then(response => {
+                console.log('Verification request successful');
+                setLoading(false);
+                let error = THEME.success;
+                Toast.show({
+                    type: 'tomatoToast',
+                    position: 'bottom',
+                    props: { msg: 'Verification code sent to your mobile.', color: error },
+                });
+                return response;
+            })
+            .catch(error => {
+                if (error.response) {
+                    setLoading(false);
+                    console.log('error', error?.response);
+                    if (error.response?.status == 400) {
+                        setLoading(false);
+                        let error = THEME.error;
+                        Toast.show({
+                            type: 'tomatoToast',
+                            position: 'bottom',
+                            props: { msg: 'Invalid mobile number.', color: error },
+                        });
+                    }
+                } else {
+                    setLoading(false);
+                    console.error('Error making the request:', error.message);
+                }
+            });
 
+    };
     return (
         <Provider>
             <ScrollView style={styles.container}>
@@ -119,7 +161,7 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                 <View style={{ paddingTop: 20 }}>
                     <Text style={styles.title}>Verify your phone number</Text>
                     <View style={{ paddingTop: 80 }}>
-                        <Text style={[styles.subTitle, { textAlign: 'left', top: 20, }]}>Enter 6-digit code to continue</Text>
+                        <Text style={[styles.subTitle, { textAlign: 'left', top: 20, }]}>Enter 4-digit code to continue</Text>
                         <View style={styles.otpContainer}>
                             {otp.map((digit, index) => (
                                 <TextInput
@@ -147,11 +189,15 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                                 />
                             ))}
                         </View>
+                        <TouchableOpacity style={{ padding:10, alignSelf:'flex-end'}} activeOpacity={0.5} onPress={()=> handleResendOTP(phoneNumber)} >
+                            <Text>Resend</Text>
+                        </TouchableOpacity>
                     </View>
+                    {/* { backgroundColor: isOtpComplete ? THEME.primary : loading ? THEME.lightGray : THEME.lightGray } */}
                     <Button
                         mode="contained"
                         onPress={onVerifyOTP}
-                        style={[styles.resendButton, { backgroundColor: isOtpComplete ? THEME.primary : loading ? THEME.lightGray : THEME.lightGray }]}
+                        style={[styles.resendButton, loading ? {  backgroundColor: THEME.lightGray }: isOtpComplete ? {  backgroundColor: THEME.primary }: {  backgroundColor: THEME.lightGray } ]}
                         disabled={!isOtpComplete || loading}
                     >
                         {loading ? buttonStatusMsg : "Verify"}

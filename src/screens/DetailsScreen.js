@@ -23,7 +23,7 @@ export default function DetailsScreen({ navigation, route }) {
     };
 
     return (
-        <View style={[styles.container, { paddingTop: 15 }]}>
+        <View style={[styles.container, { paddingTop: 0 }]}>
             <ScrollView>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton} activeOpacity={0.8}>
                     <Icon name={'chevron-left'} size={22} color={THEME.black} />
@@ -31,7 +31,7 @@ export default function DetailsScreen({ navigation, route }) {
                 {imageUrls && <SliderBox
                     images={imageUrls}
                     sliderBoxHeight={300}
-                    onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
+                    // onCurrentImagePressed={index => console.warn(`image ${index} pressed`)}
                     dotColor={THEME.primary}
                     inactiveDotColor="#90A4AE"
                     dotStyle={{

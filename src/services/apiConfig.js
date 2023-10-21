@@ -5,7 +5,19 @@ export const API_BASE_URL = 'https://fabkw.com/';
 
 // If your API requires authentication, you can define the authentication token here
 // Replace 'YOUR_AUTH_TOKEN' with the actual token value
-export const AUTH_TOKEN = 'YOUR_AUTH_TOKEN';
+
+
+// TWILIO 
+const ACCOUNT_SID = 'AC8f370cf9162a357dcdcc6b26e8cae742';
+const AUTH_TOKEN = 'd9ee12eb4a68e2d7b2268c1c0fc1863c';
+const SERVICE_SID = 'VA9965ca3fc61a7cfb7db003c6ffe74682';
+
+export {
+    ACCOUNT_SID,
+    AUTH_TOKEN,
+    SERVICE_SID
+}
+
 
 // Other common configurations can be defined here as well, for example:
 // export const API_TIMEOUT = 10000; // Set a timeout for API requests

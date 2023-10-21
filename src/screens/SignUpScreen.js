@@ -1,26 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform, TouchableOpacity, Image } from 'react-native';
-import { TextInput, Button, Checkbox, HelperText, Provider } from 'react-native-paper';
+import { TextInput, Button, Checkbox, Provider } from 'react-native-paper';
 import CountryPicker from 'react-native-country-picker-modal';
 import { THEME, fontFamily } from '../theme/appTheme';
-import { SignUp, getDeviceId } from '../services';
 import axios from 'axios';
 import { encode } from 'base-64';
-// import querystring from 'querystring';
 import Toast from 'react-native-toast-message';
+import { ACCOUNT_SID, AUTH_TOKEN,SERVICE_SID } from '../services/apiConfig';
+import TermsCondition from '../components/TermsCondition';
+
 
 const SignUpScreen = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
     const [isChecked, setIsChecked] = useState(false);
-    const [selectedCountry, setSelectedCountry] = useState({ cca2: 'US', callingCode: '1' });
-    const [passwordError, setPasswordError] = useState(false);
+    const [selectedCountry, setSelectedCountry] = useState({ cca2: 'PK', callingCode: '+92' });
     const [isSignUpDisabled, setIsSignUpDisabled] = useState(true);
-    const [securePassword, setSecurePassword] = useState(true); // State to control password visibility
-    const [confirmSecurePassword, setConfirmSecurePassword] = useState(true); // State to control password visibility
     const [loading, setLoading] = useState(false);
+
+    const termRef = useRef();
+    const PrivacyRef = useRef();
+
+    const onOpenterms = () => {
+        termRef?.current.open();
+      }
+    const onCloseterms = () => {
+        termRef?.current.close();
+      }
+      const onOpenPrivacy  = () => {
+        termRef?.current.open();
+        if (PrivacyRef.current) {
+            // Replace 'textRef' with the ref of the Text element you want to scroll to
+            const yOffset = textRef.current;
+            PrivacyRef.current.scrollTo({ y: yOffset, animated: true });
+          }
+      }
 
     useEffect(() => {
         // Enable the Sign Up button when all form fields are filled
@@ -29,68 +43,49 @@ const SignUpScreen = ({ navigation }) => {
         } else {
             setIsSignUpDisabled(true);
         }
-    }, [phoneNumber, username, password, confirmPassword, isChecked]);
+    }, [phoneNumber, username, isChecked]);
 
-
-    const getTwilioOTPCode = async (phoneNumber) => {
-
-
-    };
 
     const handleSignUp = async () => {
         setLoading(true);
-        // let deviceId = await getDeviceId();
-        // const phoneId = deviceId;
-        // let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
-        // let res = await response.json();
-        // if (response && response.status == 200) {
-
-        // TWILIO OTP
-        const accountSid = 'AC2614c158a71c453e081884d57aa818ec';
-        const authToken = '9572e984473c190550a96a71de627e98';
-        const serviceSid = 'VA11b7f786f210e0efdfc150f49bfaddac';  // Service SID for your Verify service
-        // Encode the credentials with base-64
-        const base64Credentials = encode(`${accountSid}:${authToken}`);
+        const base64Credentials = encode(`${ACCOUNT_SID}:${AUTH_TOKEN}`);
         const axiosConfig = {
             headers: {
                 'Authorization': `Basic ${base64Credentials}`,
                 "Content-Type": "application/x-www-form-urlencoded"
             },
         };
-        console.log('phoneNumber', `+${selectedCountry?.callingCode[0]}${phoneNumber}`);
+        console.log('sign up with:', `${selectedCountry?.callingCode}${phoneNumber}`);
         axios
-            .post(`https://verify.twilio.com/v2/Services/${serviceSid}/Verifications`, {
-                "To": `+${selectedCountry?.callingCode[0]}${phoneNumber}`,
+            .post(`https://verify.twilio.com/v2/Services/${SERVICE_SID}/Verifications`, {
+                "To": `${selectedCountry?.callingCode}${phoneNumber}`,
                 "Channel": "sms",
             }, axiosConfig)
             .then(response => {
                 console.log('Verification request successful');
-                console.log('Response data:', response.data);
                 setLoading(false);
                 let error = THEME.success;
                 Toast.show({
                     type: 'tomatoToast',
-                    position: 'bottom', // 'top', 'center', 'bottom'
-                    // And I can pass any custom props I want
-                    props: { msg: 'Verification code sent to your mobile.', color:  error  },
+                    position: 'bottom',
+                    props: { msg: 'Verification code sent to your mobile.', color: error },
                 });
                 setTimeout(() => {
-                    navigation.navigate('OtpLogin', { phoneNumber: `+${selectedCountry?.callingCode[0]}${phoneNumber}` });
+                    navigation.navigate('OtpLogin', { phoneNumber: `${selectedCountry?.callingCode}${phoneNumber}` });
                 }, 600);
-                // Handle the response or verification code as needed
                 return response;
             })
             .catch(error => {
                 if (error.response) {
                     setLoading(false);
+                    console.log('error', error?.response);
                     if (error.response?.status == 400) {
                         setLoading(false);
                         let error = THEME.error;
                         Toast.show({
                             type: 'tomatoToast',
-                            position: 'bottom', // 'top', 'center', 'bottom'
-                            // And I can pass any custom props I want
-                            props: { msg: 'Invalid mobile number.', color:  error  },
+                            position: 'bottom',
+                            props: { msg: 'Invalid mobile number.', color: error },
                         });
                     }
                 } else {
@@ -117,7 +112,6 @@ const SignUpScreen = ({ navigation }) => {
                             countryCode: selectedCountry.cca2,
                             withFilter: true,
                             withFlag: true,
-                            // withCountryNameButton: true,
                             withCallingCode: true,
                             withCallingCodeButton: true,
                             onSelect: (country) => setSelectedCountry(country),
@@ -153,9 +147,9 @@ const SignUpScreen = ({ navigation }) => {
                     />
                     <Text style={styles.checkboxLabel}>
                         I have read the FabApp{' '}
-                        <Text onPress={() => navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Terms Conditions</Text>{' '}
+                        <Text onPress={() => onOpenterms()} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Terms Conditions</Text>{' '}
                         and{' '}
-                        <Text onPress={() => navigation.navigate('TermsCondition')} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>
+                        <Text onPress={() => onOpenPrivacy()} style={{ color: THEME.primary, textDecorationLine: 'underline' }}>Privacy Policy</Text>
                     </Text>
                 </View>
                 <Button
@@ -174,6 +168,7 @@ const SignUpScreen = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+            <TermsCondition PrivacyRef={PrivacyRef} termRef={termRef} onCloseterms={onCloseterms} />
         </Provider>
     );
 };

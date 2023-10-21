@@ -504,7 +504,7 @@ const AdsFornScreen = ({ navigation, route }) => {
               <View>
                 <Text style={styles.inputTitle}>{'Name'}</Text>
                 <TextInput
-                  // placeholder={profile?.user_name}
+                  placeholder={profile?.user_name}
                   value={profile?.user_name}
                   // onChangeText={(text) => setDescription(text)}
                   style={[styles.textInput, { width: "100%" }]}

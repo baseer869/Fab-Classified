@@ -115,15 +115,15 @@ const ClassifiedItem = (item, index) => {
   )
 }
 
-const AdsListingScreen = ({ navigation, route }) => {
-  let { user_id } = route?.params;
+const FilterAdsListingScreen = ({ navigation, route }) => {
+  let { filterby } = route?.params;
   const [ClassifiedAds, setClassified] = useState([]);
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
     setLoading(true);
     const fetchClassifiedAds = async () => {
-      let response = await classifiedAds(`api/adds?uid=${user_id}`);
+      let response = await classifiedAds(`api/adds?mid=${filterby.cid}`);
       let Ads = await response?.json();
       setClassified(Ads);
       setLoading(false);
@@ -136,9 +136,9 @@ const AdsListingScreen = ({ navigation, route }) => {
       <StatusBar backgroundColor={THEME.white} />
       <View style={styles.flexDirection}>
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 10 }}  >
-          <Icon name={'chevron-left'} size={24} color={THEME.black} />
+          <Icon name={'chevron-left'} size={28} color={THEME.black} />
         </TouchableOpacity>
-        <Text style={styles.text}>My Ads</Text>
+        <Text style={styles.text}>{ filterby?.title}</Text>
       </View>
       {loading ? <ActivityIndicator style={{ alignSelf:'center'}} color={THEME.primary} animating={loading} /> : <View style={styles.innerContainer}>
         <FlatList
@@ -147,10 +147,17 @@ const AdsListingScreen = ({ navigation, route }) => {
           renderItem={({ item, index }) => <ClassifiedItem  {...item} index={index} navigation={navigation} />}
           contentContainerStyle={{ marginVertical: "4%" }}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={()=>{
+            return (
+              <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
+                <Text>No data found</Text>
+              </View>
+            )
+          }}
         />
       </View>}
     </SafeAreaView>
   )
 }
 
-export default AdsListingScreen;
+export default FilterAdsListingScreen;
