@@ -62,7 +62,7 @@ export default function DetailsScreen({ navigation, route }) {
                     <Text style={styles.description}>{addHeadings?.add_detail}</Text>
                 </View>
             </ScrollView>
-            <View style={[styles.btnContainer, Platform.OS == 'ios' && { marginBottom: 15 }]}>
+            <View style={[styles.btnContainer, Platform.OS == 'ios' && { marginBottom: 30 }]}>
                 <TouchableOpacity onPress={() => onCall()} activeOpacity={0.8} style={[styles.btn, { borderColor: 'blue' }]}>
                     <Icon name={'phone'} size={20} color={'blue'} />
                     <Text style={styles.btnTitle}>{'Call Now'}</Text>
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         zIndex: 100,
-        top: 40,
+        top: 50,
         width: 40,
         height: 40,
         borderRadius: 100,

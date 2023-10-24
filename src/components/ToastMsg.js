@@ -53,7 +53,7 @@ export  const toastConfig = {
 
 const styles = StyleSheet.create({
   msg :{
-    fontSize:10,
+    fontSize:11,
     color: THEME.white,
     fontFamily: fontFamily.poppins_500,
     textAlign:'center'

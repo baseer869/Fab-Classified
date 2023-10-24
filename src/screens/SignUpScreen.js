@@ -8,6 +8,7 @@ import { encode } from 'base-64';
 import Toast from 'react-native-toast-message';
 import { ACCOUNT_SID, AUTH_TOKEN, SERVICE_SID } from '../services/apiConfig';
 import TermsCondition from '../components/TermsCondition';
+import { VerifyLgin, getDeviceId } from '../services';
 
 const SignUpScreen = ({ navigation }) => {
     const [phoneNumber, setPhoneNumber] = useState('');
@@ -44,9 +45,28 @@ const SignUpScreen = ({ navigation }) => {
         }
     }, [phoneNumber, username, isChecked]);
 
-// SIGN UP
+    // SIGN UP
     const handleSignUp = async () => {
         setLoading(true);
+        // Check if user already exist with device or mobile number
+        let userVerify = {
+            "user_mob": `${selectedCountry?.callingCode}${phoneNumber}`,
+            "phonecode": await getDeviceId()
+        }
+        let response = await VerifyLgin(`api/checkPhone`, userVerify);
+        let res = await response?.json();
+        console.log('does user exist==>', res);
+        if (res && res?.status == 400) {
+            setLoading(false);
+            let error = THEME.error;
+            Toast.show({
+                type: 'tomatoToast',
+                position: 'bottom',
+                props: { msg: 'Already registered.', color: error },
+            });
+            return;
+        }
+        // OTP Generate 
         const base64Credentials = encode(`${ACCOUNT_SID}:${AUTH_TOKEN}`);
         const axiosConfig = {
             headers: {
@@ -136,6 +156,7 @@ const SignUpScreen = ({ navigation }) => {
                             }}
                             disabled={loading}
                             returnKeyType='done'
+                            placeholderTextColor={THEME.black}
                         />
                     </View>
                 </View>
@@ -191,7 +212,7 @@ const styles = StyleSheet.create({
     infoText: {
         fontSize: 14,
         lineHeight: 16,
-        fontFamily: 'Montserrat-Light',
+        fontFamily: 'Montserrat-Medium',
         textAlign: 'center',
         color: THEME.black,
     },
@@ -225,7 +246,10 @@ const styles = StyleSheet.create({
     input: {
         backgroundColor: THEME.white,
         width: "90%",
-        color: THEME.black
+        color: THEME.black,
+        fontFamily: fontFamily.poppins_600,
+        fontSize: 16,
+        lineHeight: 18
     },
     checkboxContainer: {
         flexDirection: 'row',

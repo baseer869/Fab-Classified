@@ -93,7 +93,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: "60%"
+    width: "60%",
+    paddingHorizontal:8
+  },
+  emptyState:{
+    fontSize:16,
+    color: THEME.black,
+    fontFamily: fontFamily.poppins_600,
+    lineHeight:18,
+    textAlign:'center'
   }
 });
 
@@ -136,7 +144,7 @@ const AdsListingScreen = ({ navigation, route }) => {
       <StatusBar backgroundColor={THEME.white} />
       <View style={styles.flexDirection}>
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={{ padding: 10 }}  >
-          <Icon name={'chevron-left'} size={24} color={THEME.black} />
+          <Icon name={'chevron-left'} size={28} color={THEME.black} />
         </TouchableOpacity>
         <Text style={styles.text}>My Ads</Text>
       </View>
@@ -147,6 +155,13 @@ const AdsListingScreen = ({ navigation, route }) => {
           renderItem={({ item, index }) => <ClassifiedItem  {...item} index={index} navigation={navigation} />}
           contentContainerStyle={{ marginVertical: "4%" }}
           showsVerticalScrollIndicator={false}
+          ListEmptyComponent={()=>{
+            return (
+              <View style={{ marginTop:30}}>
+                <Text style={styles.emptyState}>You have no Ads.</Text>
+              </View>
+            )
+          }}
         />
       </View>}
     </SafeAreaView>

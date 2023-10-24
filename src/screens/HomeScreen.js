@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, Image, ImageBackground, StatusBar, TouchableOpacity, FlatList, ScrollView, SafeAreaView, Platform } from 'react-native';
+import { StyleSheet, View, Text, Image, ImageBackground, StatusBar, TouchableOpacity, FlatList, ScrollView, SafeAreaView, Platform, ActivityIndicator } from 'react-native';
 import { THEME, fontFamily } from '../theme/appTheme';
 import LinearGradient from 'react-native-linear-gradient';
 import { ImagebaseUrl } from '../services/apiConstant';
@@ -7,7 +7,7 @@ import { PhoneButton } from '../components/AdsComponent';
 import MenuHeader from '../components/MenuHeader';
 import { classifiedAds, onCallNow, onWhatsAppNow } from '../services/apiUtils';
 
-const CommercialItem = ({ addHeadings, addVideos, addImage, addPersonalInfo, index, onWhatApp, onCall, onItemClick }) => {
+const CommercialItem = ({ addHeadings, addVideos, addData, addImage, addPersonalInfo, index, onWhatApp, onCall, onItemClick , navigation}) => {
     let videoReel = {
         "user_id": addHeadings?.user_id,
         "video_id": 14,
@@ -15,8 +15,9 @@ const CommercialItem = ({ addHeadings, addVideos, addImage, addPersonalInfo, ind
         video_url: addVideos?.video_url,
         images: addImage
     }
+  let itemDetails = { addData, addHeadings, addPersonalInfo, addImage };
     return (
-        <View style={styles.CommercialItemContainer}>
+        <TouchableOpacity  onPress={() => navigation.navigate('DetailsScreen', { itemDetails })} activeOpacity={0.8} style={styles.CommercialItemContainer}>
             <ImageBackground
                 source={{ uri: `${ImagebaseUrl}/${addImage[0]?.image_name}` }}
                 style={{ height: 150, width: 130, justifyContent: 'center', }}
@@ -29,12 +30,14 @@ const CommercialItem = ({ addHeadings, addVideos, addImage, addPersonalInfo, ind
                 <PhoneButton onButtonPress={() => onWhatApp(addPersonalInfo[0]?.user_mob)} title={'Whatsapp'} icon={'whatsapp'} color={'green'} />
                 <PhoneButton onButtonPress={() => onCall(addPersonalInfo[0]?.user_mob)} title={'Call Now'} icon={'phone'} color={'blue'} />
             </View>
-        </View>
+        </TouchableOpacity>
 
     )
 }
 
 const HomeScreen = ({ navigation }) => {
+
+    const [loading, setLoading] = useState(loading);
 
     const onPhoneContactHandler = () => { console.log('phone called') };
     const onMenuClick = () => { navigation.openDrawer() };
@@ -44,10 +47,11 @@ const HomeScreen = ({ navigation }) => {
     const [commercialAds, setCommercialAds] = useState([]);
     // 
     const fetchCommercialAds = async () => {
+        setLoading(true);
         let response = await classifiedAds('api/adds');
         let AdResponse = await response?.json();
         setCommercialAds(AdResponse.slice(0, 10));
-        console.log('ccccc', AdResponse);
+        setLoading(false);
     };
     useEffect(() => {
         fetchCommercialAds();
@@ -76,38 +80,43 @@ const HomeScreen = ({ navigation }) => {
     return (
         <ScrollView scrollEnabled={true} contentContainerStyle={styles.container}>
             <StatusBar backgroundColor={'rgba(255, 0, 0, 0.41)'} />
-            <MenuHeader onMenuClick={onMenuClick} onNotificationClick={onNotificationClick} />
-            <ImageBackground
-                resizeMode='cover'
-                source={{ uri: `${ImagebaseUrl}${commercialAds[0]?.addImage[0]?.image_name}` }}
-                style={{ height: "62%", width: "100%", }}
-            >
-                {/* <TouchableOpacity onPress={() => onMainBannerClick()} style={styles.playButton} >
+            {loading ?
+                <ActivityIndicator color={THEME.black} size={26} style={{ flex:1, alignSelf:'center', }} /> :
+                <>
+                    <MenuHeader onMenuClick={onMenuClick} onNotificationClick={onNotificationClick} />
+                    <ImageBackground
+                        resizeMode='cover'
+                        source={{ uri: `${ImagebaseUrl}${commercialAds[0]?.addImage[0]?.image_name}` }}
+                        style={{ height: "62%", width: "100%", }}
+                    >
+                        {/* <TouchableOpacity onPress={() => onMainBannerClick()} style={styles.playButton} >
                     <Image source={require('../assets/play-icon.png')} style={styles.playIcon} />
                 </TouchableOpacity> */}
-                <LinearGradient colors={['rgba(255, 0, 0, 0.41)', 'rgba(255, 0, 0, 0.41)', 'rgba(255, 0, 0, 0.41)']} style={styles.linearGradient}>
-                    <TouchableOpacity onPress={() => onMainBannerClick()} style={styles.playButton} >
-                        <Image source={require('../assets/play-icon.png')} style={styles.playIcon} />
-                    </TouchableOpacity>
-                </LinearGradient>
-            </ImageBackground>
-            <View style={styles.CommercialAdsView}>
-                <View>
-                    <Text style={styles.title}>Commercial Ads</Text>
-                    <Text style={styles.subtitle}>Most popular commercial Ads</Text>
-                </View>
-                <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('Listing')}>
-                    <Text style={styles.viewAll}>View All</Text>
-                </TouchableOpacity>
-            </View>
-            <View style={styles.padding}>
-                <FlatList
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    data={commercialAds}
-                    renderItem={({ item, index }) => < CommercialItem onWhatApp={onWhatsApp} onCall={onCall} onButtonPress={onPhoneContactHandler} onItemClick={onItemClick} {...item} index={index} />}
-                />
-            </View>
+                        <LinearGradient colors={['rgba(255, 0, 0, 0.41)', 'rgba(255, 0, 0, 0.41)', 'rgba(255, 0, 0, 0.41)']} style={styles.linearGradient}>
+                            <TouchableOpacity onPress={() => onMainBannerClick()} style={styles.playButton} >
+                                <Image source={require('../assets/play-icon.png')} style={styles.playIcon} />
+                            </TouchableOpacity>
+                        </LinearGradient>
+                    </ImageBackground>
+                    <View style={styles.CommercialAdsView}>
+                        <View>
+                            <Text style={styles.title}>Commercial Ads</Text>
+                            <Text style={styles.subtitle}>Most popular commercial Ads</Text>
+                        </View>
+                        <TouchableOpacity activeOpacity={0.7} onPress={() => navigation.navigate('Listing')}>
+                            <Text style={styles.viewAll}>View All</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.padding}>
+                        <FlatList
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            data={commercialAds}
+                            renderItem={({ item, index }) => < CommercialItem onWhatApp={onWhatsApp} onCall={onCall} onButtonPress={onPhoneContactHandler} onItemClick={onItemClick} {...item} index={index} navigation={navigation} />}
+                        />
+                    </View>
+                </>
+            }
         </ScrollView>
 
     )

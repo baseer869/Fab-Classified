@@ -180,12 +180,12 @@ const ProfileScreen = ({ navigation }) => {
           <View style={styles.profileContainer}>
             <View style={styles.flexDirection}>
               <TouchableOpacity activeOpacity={0.8} style={styles.usernameContainer}>
-                {profile && profile?.userPhoto ? <Image source={{ uri: profile?.userPhoto }} style={{ width:60, height:60, borderRadius:100}} /> :
+                {profile && profile?.userPhoto ? <Image source={{ uri: profile?.userPhoto }} style={{ width: 60, height: 60, borderRadius: 100 }} /> :
                   <Text style={styles.username}>{profile?.user_name?.charAt(0)}</Text>}
               </TouchableOpacity>
               <View style={{ paddingHorizontal: 8 }}>
                 <Text style={[styles.username, { color: THEME.black, fontFamily: fontFamily.poppins_500 }]}>{`Welcome ${profile?.user_name}`}</Text>
-                {profile?.user_mob ? <Text style={styles.phone}>{`+${profile?.phonecode} ${profile?.user_mob}`}</Text>
+                {profile?.user_mob ? <Text style={styles.phone}>{`${profile?.user_mob}`}</Text>
                   :
                   <Text style={styles.phone}>{`${profile?.email}`}</Text>
                 }

@@ -4,11 +4,11 @@ import { TextInput, Button, Checkbox, HelperText, Provider } from 'react-native-
 import CountryPicker from 'react-native-country-picker-modal';
 import { THEME, fontFamily } from '../theme/appTheme';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { LoggedWithGoogle, getDeviceId, onCompleteProfile } from '../services';
+import { LoggedWithGoogle, getDeviceId, onCompleteProfile, saveUserInfo, saveUserToken } from '../services';
 import { API_BASE_URL } from '../services/apiConfig';
 
 const AddProfileScreen = ({ navigation, route }) => {
-  let { userid} = route?.params;
+  let { user_id } = route?.params;
   const [phoneNumber, setPhoneNumber] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -17,7 +17,7 @@ const AddProfileScreen = ({ navigation, route }) => {
   const [isSignUpDisabled, setIsSignUpDisabled] = useState(true);
   const [securePassword, setSecurePassword] = useState(true); // State to control password visibility
   const [confirmSecurePassword, setConfirmSecurePassword] = useState(true); // State to control password visibility
-
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     // Enable the Sign Up button when all form fields are filled
     if (username && password && confirmPassword) {
@@ -25,53 +25,30 @@ const AddProfileScreen = ({ navigation, route }) => {
     } else {
       setIsSignUpDisabled(true);
     }
-  }, [ username, password, confirmPassword,]);
+  }, [username, password, confirmPassword,]);
 
   const onSubmit = async () => {
-    let response = await onCompleteProfile(`api/complete-profile?name=${username}&pwd=${password}&confirmpwd=${confirmPassword}&uid=${userid}`, null);
-    console.log('response of complete', response);
-    let res = await response.json();
-    console.log('response of user profile complete==>', res);
-    if (response && response.status == 200) {
-          //       saveUserToken();
-          // saveUserInfo(useResponse);
-
-         //
-      //    let userProfile = {
-      //     userToken: userInfo?.idToken,
-      //     email: user.email,
-      //     name: user?.name,
-      //     photo: user?.photo,
-      //     socialId: user?.id,
-      //     loggedWith: 'google',
-      //     isLogged: true,
-      //     phonecode : await getDeviceId(),
-      //   }
-      //   let response = await LoggedWithGoogle('api/loggedWithSocial', userProfile);
-      //   let useResponse = await response.json();
-      //   console.log('user profile details', useResponse);
-      //    if(useResponse && useResponse?.status == 200){
-      //     saveUserToken();
-      //     saveUserInfo(useResponse);
-      //     navigation.replace('DrawerMenu');
-      //    } else if(useResponse && useResponse?.status == 400){
-      //     console.log('error',useResponse.errorcode )
-      //    } 
-      //    else {
-      //     console.log('unable  to loggin with google');
-      //   }
-      // navigation.navigate('DrawerMenu');
+    setLoading(false);
+    let payload = {
+      "uid": user_id,
+      "name": username,
+      "pwd": password,
+      "confirmpwd": confirmPassword,
     }
-
-    // You can access the form data: phoneNumber, username, password, isChecked, and selectedCountry
-    // Example password validation
-    // if (password !== confirmPassword) {
-    //     setPasswordError(true);
-    //     return;
-    // }
-    // Reset password error state
-    // setPasswordError(false);
-    // Proceed with sign-up
+    let response = await onCompleteProfile(`api/complete-profile`, payload);
+    let res = await response.json();
+    if (res && response?.status == 200  && res?.user_status == 'complete') {
+      setLoading(true);
+      saveUserToken();
+      let userProfile = {
+        data: res
+      }
+      saveUserInfo(userProfile);
+      navigation.replace('DrawerMenu');
+    } else if (response && response?.status == 400) {
+      setLoading(true)
+      console.log('error', response)
+    }
   };
   // Function to toggle password visibility
   const togglePasswordVisibility = () => {
@@ -156,8 +133,8 @@ const AddProfileScreen = ({ navigation, route }) => {
         <Button
           mode='outlined'
           onPress={onSubmit}
-          style={[styles.signUpButton, { backgroundColor: isSignUpDisabled ? THEME.lightGray : THEME.primary }]}
-          disabled={isSignUpDisabled}
+          style={[styles.signUpButton, { backgroundColor: (isSignUpDisabled || loading ) ? THEME.lightGray : THEME.primary }]}
+          disabled={isSignUpDisabled || loading}
           textColor='#fff'
         >
           Save

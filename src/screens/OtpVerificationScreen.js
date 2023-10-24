@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, StatusBar, Platform, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { TextInput, Button, Provider } from 'react-native-paper';
 import { THEME } from '../theme/appTheme';
-import { getDeviceId, loggedWithSocial, saveUserInfo, saveUserToken } from '../services/apiUtils';
+import {getDeviceId, loggedWithSocial, } from '../services/apiUtils';
 import axios from 'axios';
 import { encode } from 'base-64';
 import Toast from 'react-native-toast-message';
@@ -60,47 +60,29 @@ const OtpVerificationScreen = ({ navigation, route }) => {
                         position: 'bottom',
                         props: { msg: 'Invalid OTP', color: THEME.error },
                     });
-                } if (response && response?.status == 200 && response?.data?.status == "pending") {
+                } if (response && response?.status == 200 && response?.data?.status == "approved") {
                     setButtonStatusMsg('Creating profile...')
                     let deviceId = await getDeviceId();
-
-                    // Old API
-
-                    // const phoneId = deviceId;
-                    // let response = await SignUp(`api/register?user_mob=${phoneNumber}&phonecode=${phoneId}`, null);
-                    // let res = await response.json();
-                    // if (response?.status == 200) {
-                    //     console.log('user registered success');
-                    //     setLoading(false);
-                    //     navigation.replace('AddProfileScreen', { userid: response?.userid });
-                    // } else {
-                    //     console.log('user registered failed');
-                    //     setLoading(false);
-                    //     console.log('response of sign==>', response);
-                    // }
-
                     // New API
                     let userProfile = {
-                        phonecode: await getDeviceId(),
-                        user_mob: phoneNumber,
-                        user_code: code,
-                        loggedWith: 'phoneNumber',
-                        isLogged: true,
-                        userToken: null,
-                        email: null,
-                        name: null,
-                        photo: null,
-                        socialId: null,
+                        "user_mob": phoneNumber,
+                        "phonecode": `${deviceId}`,
+                        "user_code": code,
+                        "isLogged": false,
+                        "loggedWith": "phoneNumber",
+                        "userToken": null,
+                        "email": null,
+                        "name": null,
+                        "photo": null,
+                        "socialId": null
                     }
                     console.log('user profile payload==>', userProfile);
-                    let response = await loggedWithSocial('api/loggedWithSocial', userProfile);
+                    let response = await loggedWithSocial('api/create-with-phone', userProfile);
                     let useResponse = await response.json();
                     console.log('user profile creation response', useResponse);
-                    if (useResponse && useResponse?.status == 200) {
-                        // saveUserToken();
-                        // saveUserInfo(useResponse);
+                    if (useResponse && useResponse?.status == 200 && useResponse?.code == 'success') {
                         setLoading(false);
-                        navigation.replace('AddProfileScreen', { userid: response?.userid });
+                        navigation.replace('AddProfileScreen', { user_id: useResponse?.user_id });
                     } else if (useResponse && useResponse?.status == 400) {
                         console.log('error', useResponse.errorcode)
                     }

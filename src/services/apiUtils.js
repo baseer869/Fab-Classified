@@ -65,6 +65,11 @@ export async function SignUp(url, data, token = false) {
   return Api(url, 'POST', data, token);
 }
 
+// POST request To Verify User
+export async function VerifyLgin(url, data, token = false) {
+  return Api(url, 'POST', data, token);
+}
+
 // POST request Sign Up
 export async function Login(url, data, token = false) {
   return Api(url, 'POST', data, token);

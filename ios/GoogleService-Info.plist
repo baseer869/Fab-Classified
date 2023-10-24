@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>587869193262-vvp6qoo736f6h2hd10hkts5l1en4osaq.apps.googleusercontent.com</string>
+	<string>156556297832-02s9gme1georv4dmgsosvvdjrbpsdm5b.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.587869193262-vvp6qoo736f6h2hd10hkts5l1en4osaq</string>
+	<string>com.googleusercontent.apps.156556297832-02s9gme1georv4dmgsosvvdjrbpsdm5b</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>587869193262-cepa4hes1n0g01bt8gmitjtnchech7nd.apps.googleusercontent.com</string>
+	<string>156556297832-td4oaoqr2m60nglitnauac9lpsps3pd3.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDMuAheOLHnfq1mnL5EyPFcNuk3ECis0l0</string>
+	<string>AIzaSyCKrCPEtlvv02uEPWkN4KR6yhLD76UmTRg</string>
 	<key>GCM_SENDER_ID</key>
-	<string>587869193262</string>
+	<string>156556297832</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.fabapp</string>
+	<string>com.marketplace.fabapp</string>
 	<key>PROJECT_ID</key>
-	<string>fabclassified-29133</string>
+	<string>fabclassified-ff593</string>
 	<key>STORAGE_BUCKET</key>
-	<string>fabclassified-29133.appspot.com</string>
+	<string>fabclassified-ff593.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +31,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:587869193262:ios:5e50dac11ae1804739cbbf</string>
+	<string>1:156556297832:ios:e78e3ecd37184da6b85ddd</string>
 </dict>
 </plist>

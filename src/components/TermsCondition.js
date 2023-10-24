@@ -12,7 +12,7 @@ const TermsCondition = ({ termRef, onCloseterms, PrivacyRef }) => {
             height={Dimensions.get('window').height}
             customStyles={{
                 container: {
-                    paddingVertical: 20,
+                    paddingVertical: 40,
                     paddingHorizontal: 15,
                     height: Dimensions.get('window').height
                 },

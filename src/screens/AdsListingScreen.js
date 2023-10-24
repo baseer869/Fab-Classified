@@ -31,10 +31,10 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: '#f0f0f0', // Light gray background color
     borderRadius: 5,
-    fontSize: 16,
+    fontSize: 12,
     height: 56,
-    fontFamily: 'Montserrat-Light',
-    color: THEME.black,
+    fontFamily: 'Montserrat-Medium',
+    color: THEME.grayRGBA,
     paddingHorizontal: 12
   },
   direction: {
@@ -90,6 +90,7 @@ const SearchInput = ({ onSearchClick }) => {
       style={styles.input}
       editable={false} // Make the TextInput disabled
       onPressOut={()=> onSearchClick()}
+      placeholderTextColor={THEME.black}
     />
   );
 };
